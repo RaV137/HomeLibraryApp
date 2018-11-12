@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">HomeLibrary</string>
+    <string name="menu_sort">Sortuj</string>
+
+    <string name="all_books_activity_title">Twoje książki</string>
+
+    <string name="book_sort_main_text">Sortowanie</string>
+    <string name="book_sort_title_asc">Tytuł A-Z</string>
+    <string name="book_sort_title_desc">Tytuł Z-A</string>
+    <string name="book_sort_author_asc">Autor A-Z</string>
+    <string name="book_sort_author_desc">Autor Z-A</string>
+    <string name="book_sort_score_desc">Ocena malejąco</string>
+    <string name="book_sort_score_asc">Ocena rosnąco</string>
+    <string name="title_activity_login">Logowanie</string>
+
+    <!-- Strings related to login -->
+    <string name="login_prompt_email_login">Login lub email</string>
+    <string name="login_prompt_password">Hasło</string>
+    <string name="action_sign_in">Zaloguj</string>
+    <string name="error_invalid_email">Podany login/email jest niepoprawny</string>
+    <string name="error_invalid_password">Podane hasło jest zbyt krótkie</string>
+    <string name="error_incorrect_password">Podane hasło jest nieprawidłowe</string>
+    <string name="error_field_required">Pole wymagane</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="action_register">Zarejestruj</string>
+</resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/grid_item_default_margin"
+        android:layout_marginTop="@dimen/grid_item_default_margin"
+        android:layout_marginEnd="@dimen/grid_item_default_margin"
+        android:gravity="center"
+        android:text="@string/book_sort_main_text" />
+
+    <RadioGroup
+        android:id="@+id/Sort"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_margin="@dimen/grid_item_default_margin">
+
+        <RadioButton
+            android:id="@+id/ScoreDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_score_desc" />
+
+
+        <RadioButton
+            android:id="@+id/ScoreAsc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_score_asc" />
+
+
+        <RadioButton
+            android:id="@+id/TitleAsc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_title_asc" />
+
+        <RadioButton
+            android:id="@+id/TitleDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_title_desc" />
+
+
+        <RadioButton
+            android:id="@+id/AuthorAsc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_author_asc" />
+
+        <RadioButton
+            android:id="@+id/AuthorDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/book_sort_author_desc" />
+
+    </RadioGroup>
+
+</LinearLayout>
