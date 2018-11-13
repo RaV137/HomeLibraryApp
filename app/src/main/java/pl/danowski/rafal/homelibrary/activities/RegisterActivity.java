@@ -64,6 +64,22 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
         mEmailView.setError(null);
+
+        String login = mLoginView.getText().toString();
+        String password = mPasswordView.getText().toString();
+        String confirmPassword = mConfirmPasswordView.getText().toString();
+        String email = mEmailView.getText().toString();
+
+        boolean cancel = false;
+        View focusView = null;
+
+        if(password.equals(confirmPassword)) {
+            mConfirmPasswordView.setError("");
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
+
     }
 
     public class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
