@@ -10,12 +10,14 @@ import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
 public class LoginRegistrationController implements ILoginRegistrationController {
 
-    private List<User> mockUsers;
+    private static List<User> mockUsers;
 
     public LoginRegistrationController() {
-        mockUsers = new ArrayList<>();
-        mockUsers.add(new User("admin", "e00cf25ad42683b3df678c61f42c6bda",
-                "Admin", "Adminowski", false, "adminadminowski@yopmail.com"));
+        if (mockUsers == null) {
+            mockUsers = new ArrayList<>();
+            mockUsers.add(new User("admin", "e00cf25ad42683b3df678c61f42c6bda",
+                    "Admin", "Adminowski", false, "adminadminowski@yopmail.com"));
+        }
     }
 
     public LoginResult attemptLogin(String loginOrEmail, String password) {
@@ -31,16 +33,16 @@ public class LoginRegistrationController implements ILoginRegistrationController
     }
 
     @Override
-    public RegistrationResult attemptRegistration(String login, String email, String password, String name, String surname) {
-        for(User u : mockUsers) {
-            if(u.getLogin().equals(login)) {
+    public RegistrationResult attemptRegistration(String login, String email, String encryptedPassword) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
                 return RegistrationResult.LOGIN_ALREADY_EXISTS;
             } else if (u.getEmail().equals(email)) {
                 return RegistrationResult.EMAIL_ALREADY_EXISTS;
             }
         }
 
-        mockUsers.add(new User(login, password,name, surname, false, email));
+        mockUsers.add(new User(login, encryptedPassword, "", "", false, email));
         return RegistrationResult.SUCCESS;
     }
 }

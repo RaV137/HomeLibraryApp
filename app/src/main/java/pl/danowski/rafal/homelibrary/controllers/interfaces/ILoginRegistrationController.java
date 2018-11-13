@@ -7,6 +7,6 @@ public interface ILoginRegistrationController {
 
     LoginResult attemptLogin(String login, String password);
 
-    RegistrationResult attemptRegistration(String login, String email, String password, String name, String surname);
+    RegistrationResult attemptRegistration(String login, String email, String encryptedPassword);
 
 }

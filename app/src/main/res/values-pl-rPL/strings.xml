@@ -11,12 +11,13 @@
     <string name="book_sort_score_desc">Ocena malejąco</string>
     <string name="book_sort_score_asc">Ocena rosnąco</string>
     <string name="title_activity_login">Logowanie</string>
-    <string name="login_prompt_email_login">Email</string>
+    <string name="login_prompt_login">Login</string>
     <string name="login_prompt_password">Hasło</string>
     <string name="action_sign_in">Zaloguj</string>
-    <string name="error_invalid_email">Podany email jest niepoprawny</string>
+    <string name="error_invalid_email">Podany login jest niepoprawny</string>
     <string name="error_invalid_password">Podane hasło jest zbyt krótkie</string>
     <string name="error_incorrect_password">Podane hasło jest nieprawidłowe</string>
     <string name="error_field_required">Pole wymagane</string>
     <string name="permission_rationale">Contacts permissions are needed for providing email</string>
+    <string name="action_register">Zarejestruj</string>
 </resources>
