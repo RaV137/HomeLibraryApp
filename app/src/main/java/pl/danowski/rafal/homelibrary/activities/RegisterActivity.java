@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +27,7 @@ import javax.mail.internet.InternetAddress;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.LoginRegistrationController;
 import pl.danowski.rafal.homelibrary.controllers.interfaces.ILoginRegistrationController;
+import pl.danowski.rafal.homelibrary.network.email.GMailSender;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
@@ -167,17 +169,38 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void sendAnEmailWithLoginCredentials(final String login, final String email, final String password) {
-        Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-        i.putExtra(Intent.EXTRA_SUBJECT, "Rejestracja konta w aplikacji HomeLibrary");
-        i.putExtra(Intent.EXTRA_TEXT, "Witaj!\nWłaśnie zarejestrowałeś się w aplikacji HomeLibrary." +
-                "\n\nTwoje dane logowania:\nLogin: " + login + "\nHasło: " + password + "" +
-                "\n\nJeśli to nie Ty się rejestrowałeś w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary");
         try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            GMailSender sender = new GMailSender();
+            sender.sendMail("Rejestracja konta w aplikacji HomeLibrary",
+                    "Witaj!\nWłaśnie zarejestrowałeś się w aplikacji HomeLibrary." +
+                            "\n\nTwoje dane logowania:\nLogin: " + login + "\nHasło: " + password + "" +
+                            "\n\nJeśli to nie Ty się rejestrowałeś w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary",
+                    "home.library.dev@gmail.com",
+                    email);
+        } catch (Exception e) {
+            Log.e("SendMail", e.getMessage(), e);
+            throw new RuntimeException("sendAnEmailWithLoginCredentials: " + e.getMessage());
+        }
+    }
+
+    public class SendEmailTask extends AsyncTask<Void, Void, Void> {
+
+        private final String login;
+        private final String email;
+        private final String password;
+
+        SendEmailTask(String login, String email, String password) {
+            this.login = login;
+            this.email = email;
+            this.password = password;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            sendAnEmailWithLoginCredentials(login, email, password);
+
+            return null;
         }
     }
 
@@ -218,8 +241,11 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                sendAnEmailWithLoginCredentials(login, email, password);
-                finishActivity(0);
+                SendEmailTask task = new SendEmailTask(login, email, password);
+                task.execute((Void) null);
+
+//                sendAnEmailWithLoginCredentials(login, email, password);
+                finish();
             } else {
                 switch (registrationResult) {
                     case CONNECTION_ERROR:
