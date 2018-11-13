@@ -1,17 +1,32 @@
 package pl.danowski.rafal.homelibrary.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.nfc.FormatException;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.LoginRegistrationController;
 import pl.danowski.rafal.homelibrary.controllers.interfaces.ILoginRegistrationController;
+import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
@@ -29,17 +44,23 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mPasswordView;
     private EditText mConfirmPasswordView;
 
+    private View mProgressView;
+    private View mRegistrationFormView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        setTitle("Rejestracja");
 
         this.loginRegistrationController = new LoginRegistrationController();
         String login = getIntent().getStringExtra(IntentExtras.LOGIN.getName());
 
         mLoginView = findViewById(R.id.textLogin);
         mPasswordView = findViewById(R.id.textPassword);
-        mConfirmPasswordView = findViewById(R.id.confirmPassword);
+        mConfirmPasswordView = findViewById(R.id.textConfirmPassword);
         mEmailView = findViewById(R.id.textEmail);
 
         if (login != null && login.length() > 0) {
@@ -51,6 +72,32 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 attemptRegistration();
+            }
+        });
+
+        mRegistrationFormView = findViewById(R.id.registration_form);
+        mProgressView = findViewById(R.id.login_progress);
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        mRegistrationFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mRegistrationFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mRegistrationFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
     }
@@ -73,33 +120,87 @@ public class RegisterActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        if(password.equals(confirmPassword)) {
-            mConfirmPasswordView.setError("");
+        if (TextUtils.isEmpty(login)) {
+            mLoginView.setError("Pole wymagane");
+            focusView = mLoginView;
+            cancel = true;
+        } else if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError("Pole wymagane");
             focusView = mPasswordView;
+            cancel = true;
+        } else if (TextUtils.isEmpty(confirmPassword)) {
+            mConfirmPasswordView.setError("Pole wymagane");
+            focusView = mConfirmPasswordView;
+            cancel = true;
+        } else if (TextUtils.isEmpty(email)) {
+            mEmailView.setError("Pole wymagane");
+            focusView = mEmailView;
+            cancel = true;
+        } else if (!password.equals(confirmPassword)) {
+            mConfirmPasswordView.setError("Hasła muszą być takie same");
+            focusView = mConfirmPasswordView;
+            cancel = true;
+        } else if (!isValidEmail(email)) {
+            mEmailView.setError("Zły format adresu email");
+            focusView = mEmailView;
             cancel = true;
         }
 
+        if (cancel) {
+            focusView.requestFocus();
+        } else {
+            showProgress(true);
+            mAuthTask = new UserRegistrationTask(login, email, password);
+            mAuthTask.execute((Void) null);
+        }
+    }
 
+    private boolean isValidEmail(String email) {
+        boolean result = true;
+        try {
+            InternetAddress emailAddress = new InternetAddress(email);
+            emailAddress.validate();
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
+    }
+
+    private void sendAnEmailWithLoginCredentials(final String login, final String email, final String password) {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+        i.putExtra(Intent.EXTRA_SUBJECT, "Rejestracja konta w aplikacji HomeLibrary");
+        i.putExtra(Intent.EXTRA_TEXT, "Witaj!\nWłaśnie zarejestrowałeś się w aplikacji HomeLibrary." +
+                "\n\nTwoje dane logowania:\nLogin: " + login + "\nHasło: " + password + "" +
+                "\n\nJeśli to nie Ty się rejestrowałeś w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary");
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String email;
+        private final String password;
         private final String encryptedPassword;
 
         private RegistrationResult registrationResult;
 
-        UserRegistrationTask(String login, String email, String encryptedPassword) {
+        UserRegistrationTask(String login, String email, String password) {
             this.login = login;
             this.email = email;
-            this.encryptedPassword = encryptedPassword;
+            this.password = password;
+            encryptedPassword = PasswordEncrypter.md5(password);
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            registrationResult = loginRegistrationController.attemptRegistration(login, email, encryptedPassword);
+            registrationResult = loginRegistrationController.attemptRegistration(getBaseContext(), login, email, encryptedPassword, isOnline());
 
             try {
                 // Simulate network access.
@@ -114,17 +215,17 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-//            showProgress(false);
+            showProgress(false);
 
             if (success) {
-                finish();
+                sendAnEmailWithLoginCredentials(login, email, password);
+                finishActivity(0);
             } else {
                 switch (registrationResult) {
                     case CONNECTION_ERROR:
-                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
+//                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
                         break;
                     case LOGIN_ALREADY_EXISTS:
-//                        mLoginView.setError(getString(R.string.error_login_already_exists));
                         mLoginView.setError(registrationResult.getText());
                         mLoginView.requestFocus();
                         break;
@@ -133,7 +234,7 @@ public class RegisterActivity extends AppCompatActivity {
                         mEmailView.requestFocus();
                         break;
                     default:
-                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
+//                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -141,7 +242,14 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-//            showProgress(false);
+            showProgress(false);
         }
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
+        return (networkInfo != null && networkInfo.isConnected());
     }
 }

@@ -16,6 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
 }
 
 dependencies {
@@ -29,4 +32,12 @@ dependencies {
 
     compileOnly "org.projectlombok:lombok:1.18.2"
     annotationProcessor 'org.projectlombok:lombok:1.18.2'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.6'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.0'
+
+    implementation 'com.android.volley:volley:1.1.1'
+
+    implementation 'com.sun.mail:javax.mail:1.6.2'
 }

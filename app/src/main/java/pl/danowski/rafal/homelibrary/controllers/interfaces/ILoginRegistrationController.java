@@ -1,12 +1,14 @@
 package pl.danowski.rafal.homelibrary.controllers.interfaces;
 
+import android.content.Context;
+
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
 import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
 public interface ILoginRegistrationController {
 
-    LoginResult attemptLogin(String login, String password);
+    LoginResult attemptLogin(Context context, String login, String password, boolean isOnline);
 
-    RegistrationResult attemptRegistration(String login, String email, String encryptedPassword);
+    RegistrationResult attemptRegistration(Context context, String login, String email, String encryptedPassword, boolean isOnline);
 
 }

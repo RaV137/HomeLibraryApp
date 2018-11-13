@@ -26,4 +26,9 @@
     </string>
     <string name="action_register">Zarejestruj</string>
     <string name="error_login_already_exists">Podany login już istnieje</string>
+    <string name="register_prompt_email">Email</string>
+    <string name="register_prompt_confirm_password">Potwierdź hasło</string>
+    <string name="register_prompt_password">Hasło</string>
+    <string name="register_prompt_login">Login</string>
+    <string name="registration_label">Rejestracja</string>
 </resources>

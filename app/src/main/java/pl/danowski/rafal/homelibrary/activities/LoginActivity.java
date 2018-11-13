@@ -3,7 +3,10 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.LoginRegistrationController;
 import pl.danowski.rafal.homelibrary.controllers.interfaces.ILoginRegistrationController;
+import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
 
@@ -31,12 +35,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private ILoginRegistrationController loginRegistrationController;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
     private UserLoginTask mAuthTask = null;
 
-    // UI references.
     private EditText mLoginView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -47,21 +47,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        setTitle("Logowanie");
+
         loginRegistrationController = new LoginRegistrationController();
-
         mLoginView = findViewById(R.id.textLogin);
-
-        mPasswordView = findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+        mPasswordView = findViewById(R.id.textPassword);
 
         Button mSignInButton = findViewById(R.id.loginButton);
         mSignInButton.setOnClickListener(new OnClickListener() {
@@ -84,6 +74,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToRegister() {
+        mPasswordView.setError(null);
+        mPasswordView.setText("");
         Intent intent = new Intent(this, RegisterActivity.class);
         String login = mLoginView.getText().toString();
         intent.putExtra(IntentExtras.LOGIN.getName(), login);
@@ -111,36 +103,24 @@ public class LoginActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+        if (TextUtils.isEmpty(login)) {
+            mLoginView.setError("Pole jest wymagane");
+            focusView = mLoginView;
+            cancel = true;
+        } else if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError("Pole jest wymagane");
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid login address.
-        if (TextUtils.isEmpty(login)) {
-            mLoginView.setError(getString(R.string.error_field_required));
-            focusView = mLoginView;
-            cancel = true;
-        }
-
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(login, password);
+            final String encryptedPassword = PasswordEncrypter.md5(password);
+            mAuthTask = new UserLoginTask(login, encryptedPassword);
             mAuthTask.execute((Void) null);
         }
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -178,9 +158,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-
-            LoginResult loginResult = loginRegistrationController.attemptLogin(login, mPassword);
-            Toast.makeText(getBaseContext(), loginResult.getText(), Toast.LENGTH_LONG).show();
+            LoginResult loginResult = loginRegistrationController.attemptLogin(getBaseContext(), login, mPassword, isOnline());
 
             try {
                 // Simulate network access.
@@ -198,9 +176,10 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                finish();
+                successfulLogin();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.setError("Niepoprawny login lub hasło");
+                mPasswordView.setText("");
                 mPasswordView.requestFocus();
             }
         }
@@ -211,5 +190,18 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
         }
     }
+
+    private void successfulLogin() {
+        Intent intent = new Intent(this, AllBooksActivity.class);
+        startActivity(intent);
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
 }
 
