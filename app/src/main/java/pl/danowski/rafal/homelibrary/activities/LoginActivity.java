@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
+import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 
 /**
  * A login screen that offers login via login/password.
@@ -40,43 +42,50 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
+    private CheckBox mCheckBox;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        setTitle("Logowanie");
+        if (SharedPreferencesUtilities.getUserName(LoginActivity.this, SharedPreferencesUtilities.PREF_USER_NAME).length() == 0) {
+            successfulLogin();
+        } else {
+            setTitle("Logowanie");
 
-        mUserController = new UserController();
-        mLoginView = findViewById(R.id.textLogin);
-        mPasswordView = findViewById(R.id.textPassword);
+            mUserController = new UserController();
+            mLoginView = findViewById(R.id.textLogin);
+            mPasswordView = findViewById(R.id.textPassword);
+            mCheckBox = findViewById(R.id.rememberMe);
 
-        Button mSignInButton = findViewById(R.id.loginButton);
-        mSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+            Button mSignInButton = findViewById(R.id.loginButton);
+            mSignInButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    attemptLogin();
+                }
+            });
 
-        Button mRegisterButton = findViewById(R.id.registerButton);
-        mRegisterButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goToRegister();
-            }
-        });
+            Button mRegisterButton = findViewById(R.id.registerButton);
+            mRegisterButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    goToRegister();
+                }
+            });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.forgot_password_progress);
+            mLoginFormView = findViewById(R.id.login_form);
+            mProgressView = findViewById(R.id.forgot_password_progress);
 
-        TextView mForgotPasswordView = findViewById(R.id.forgotPassword);
-        mForgotPasswordView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                forgotPassword();
-            }
-        });
+            TextView mForgotPasswordView = findViewById(R.id.forgotPassword);
+            mForgotPasswordView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    forgotPassword();
+                }
+            });
+        }
     }
 
     private void forgotPassword() {
@@ -188,6 +197,9 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
+                if(mCheckBox.isActivated()) {
+                    SharedPreferencesUtilities.setPreference(getBaseContext(), SharedPreferencesUtilities.PREF_USER_NAME, login);
+                }
                 successfulLogin();
             } else {
                 mPasswordView.setError("Niepoprawny login lub hasło");

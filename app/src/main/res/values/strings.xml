@@ -34,4 +34,5 @@
     <string name="login_remind_password">Przypomnij mi hasło</string>
     <string name="email">Email</string>
     <string name="action_forgot_password">Przypomnij hasło</string>
+    <string name="login_remember_me">Zapamiętaj mnie</string>
 </resources>
