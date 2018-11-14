@@ -4,29 +4,30 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.FormatException;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.controllers.LoginRegistrationController;
-import pl.danowski.rafal.homelibrary.controllers.interfaces.ILoginRegistrationController;
+import pl.danowski.rafal.homelibrary.controllers.UserController;
+import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.network.email.GMailSender;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
@@ -34,7 +35,7 @@ import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private ILoginRegistrationController loginRegistrationController;
+    private IUserController mUserController;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -57,7 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         setTitle("Rejestracja");
 
-        this.loginRegistrationController = new LoginRegistrationController();
+        this.mUserController = new UserController();
         String login = getIntent().getStringExtra(IntentExtras.LOGIN.getName());
 
         mLoginView = findViewById(R.id.textLogin);
@@ -78,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         mRegistrationFormView = findViewById(R.id.registration_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mProgressView = findViewById(R.id.forgot_password_progress);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -114,10 +115,10 @@ public class RegisterActivity extends AppCompatActivity {
         mConfirmPasswordView.setError(null);
         mEmailView.setError(null);
 
-        String login = mLoginView.getText().toString();
-        String password = mPasswordView.getText().toString();
-        String confirmPassword = mConfirmPasswordView.getText().toString();
-        String email = mEmailView.getText().toString();
+        final String login = mLoginView.getText().toString();
+        final String password = mPasswordView.getText().toString();
+        final String confirmPassword = mConfirmPasswordView.getText().toString();
+        final String email = mEmailView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -138,11 +139,19 @@ public class RegisterActivity extends AppCompatActivity {
             mEmailView.setError("Pole wymagane");
             focusView = mEmailView;
             cancel = true;
+        } else if (!isValidLoginFormat(login)) {
+            mLoginView.setError("Login powinien mieć minimum 5 i maksimum 20 znaków i posiadać tylko małe i duże litery oraz cyfry");
+            focusView = mLoginView;
+            cancel = true;
+        } else if (!isValidPasswordFormat(password)) {
+            mPasswordView.setError("Hasło musi zawierać małe i duże litery, min. 1 cyfrę oraz min. 1 znak specjalny, nie posiadać białych znaków oraz mieć minimum 8 znaków");
+            focusView = mPasswordView;
+            cancel = true;
         } else if (!password.equals(confirmPassword)) {
             mConfirmPasswordView.setError("Hasła muszą być takie same");
             focusView = mConfirmPasswordView;
             cancel = true;
-        } else if (!isValidEmail(email)) {
+        } else if (!isValidEmailFormat(email)) {
             mEmailView.setError("Zły format adresu email");
             focusView = mEmailView;
             cancel = true;
@@ -157,7 +166,21 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidEmail(String email) {
+    private boolean isValidLoginFormat(final String login) {
+        String regex = "^(?=.*[\\w^_])(?=\\S+$).{5,20}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(login);
+        return matcher.matches();
+    }
+
+    private boolean isValidPasswordFormat(final String password) {
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
+    }
+
+    private boolean isValidEmailFormat(final String email) {
         boolean result = true;
         try {
             InternetAddress emailAddress = new InternetAddress(email);
@@ -178,6 +201,7 @@ public class RegisterActivity extends AppCompatActivity {
                     "home.library.dev@gmail.com",
                     email);
         } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong, contact me with email home.library.dev@gmail.com", Toast.LENGTH_LONG).show();
             Log.e("SendMail", e.getMessage(), e);
             throw new RuntimeException("sendAnEmailWithLoginCredentials: " + e.getMessage());
         }
@@ -223,7 +247,7 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            registrationResult = loginRegistrationController.attemptRegistration(getBaseContext(), login, email, encryptedPassword, isOnline());
+            registrationResult = mUserController.attemptRegistration(getBaseContext(), login, email, encryptedPassword, isOnline());
 
             try {
                 // Simulate network access.
@@ -243,8 +267,7 @@ public class RegisterActivity extends AppCompatActivity {
             if (success) {
                 SendEmailTask task = new SendEmailTask(login, email, password);
                 task.execute((Void) null);
-
-//                sendAnEmailWithLoginCredentials(login, email, password);
+                showConfirmationToast();
                 finish();
             } else {
                 switch (registrationResult) {
@@ -272,10 +295,20 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    private void showConfirmationToast() {
+        Toast.makeText(this, "Udało się zarejestrować użytkownika", Toast.LENGTH_SHORT).show();
+    }
+
     private boolean isOnline() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
         return (networkInfo != null && networkInfo.isConnected());
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
 }

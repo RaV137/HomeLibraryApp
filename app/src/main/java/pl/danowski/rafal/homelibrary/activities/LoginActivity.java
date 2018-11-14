@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -12,18 +13,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.controllers.LoginRegistrationController;
-import pl.danowski.rafal.homelibrary.controllers.interfaces.ILoginRegistrationController;
+import pl.danowski.rafal.homelibrary.controllers.UserController;
+import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
@@ -33,7 +31,7 @@ import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private ILoginRegistrationController loginRegistrationController;
+    private IUserController mUserController;
 
     private UserLoginTask mAuthTask = null;
 
@@ -49,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setTitle("Logowanie");
 
-        loginRegistrationController = new LoginRegistrationController();
+        mUserController = new UserController();
         mLoginView = findViewById(R.id.textLogin);
         mPasswordView = findViewById(R.id.textPassword);
 
@@ -70,7 +68,26 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mProgressView = findViewById(R.id.forgot_password_progress);
+
+        TextView mForgotPasswordView = findViewById(R.id.forgotPassword);
+        mForgotPasswordView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                forgotPassword();
+            }
+        });
+    }
+
+    private void forgotPassword() {
+        Intent intent = new Intent(this, ForgotPasswordActivity.class);
+        String login = mLoginView.getText().toString();
+        intent.putExtra(IntentExtras.LOGIN.getName(), login);
+        mLoginView.setError(null);
+        mLoginView.setText("");
+        mPasswordView.setError(null);
+        mPasswordView.setText("");
+        startActivity(intent);
     }
 
     private void goToRegister() {
@@ -153,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            LoginResult loginResult = loginRegistrationController.attemptLogin(getBaseContext(), login, mPassword, isOnline());
+            LoginResult loginResult = mUserController.attemptLogin(getBaseContext(), login, mPassword, isOnline());
 
             try {
                 // Simulate network access.
@@ -196,6 +213,11 @@ public class LoginActivity extends AppCompatActivity {
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
         return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
 }
