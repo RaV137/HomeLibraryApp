@@ -13,5 +13,5 @@ public interface IUserController {
 
     boolean findUser(Context context, String login, String email, boolean isOnline);
 
-    void updateUserPasswort(Context context, String login, String encryptedPassword, boolean isOnline);
+    void updateUserPassword(Context context, String login, String encryptedPassword, boolean isOnline);
 }

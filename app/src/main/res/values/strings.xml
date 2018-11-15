@@ -21,9 +21,6 @@
     <string name="error_invalid_password">Podane hasło jest zbyt krótkie</string>
     <string name="error_incorrect_password">Podane hasło jest nieprawidłowe</string>
     <string name="error_field_required">Pole wymagane</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
     <string name="action_register">Zarejestruj</string>
     <string name="error_login_already_exists">Podany login już istnieje</string>
     <string name="register_prompt_email">Email</string>
@@ -35,4 +32,10 @@
     <string name="email">Email</string>
     <string name="action_forgot_password">Przypomnij hasło</string>
     <string name="login_remember_me">Zapamiętaj mnie</string>
+    <string name="premium">Premium</string>
+    <string name="profile">Profil</string>
+    <string name="my_rooms">Moje pokoje</string>
+    <string name="my_books">Moje książki</string>
+    <string name="settings">Ustawienia</string>
+    <string name="log_out">Wyloguj</string>
 </resources>

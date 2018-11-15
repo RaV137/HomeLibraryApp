@@ -13,7 +13,7 @@ import android.widget.RadioGroup;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.utiities.BookUtility;
 
-public class SortDialog extends DialogFragment {
+public class SortBooksDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

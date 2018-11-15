@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.dialogs.SortDialog;
+import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
 import pl.danowski.rafal.homelibrary.utiities.BookUtility;
 
 public class AllBooksActivity extends AppCompatActivity {
@@ -61,8 +61,8 @@ public class AllBooksActivity extends AppCompatActivity {
     }
 
     private void sort() {
-        DialogFragment dialog = new SortDialog();
-        dialog.show(getFragmentManager(), "SortDialog");
+        DialogFragment dialog = new SortBooksDialog();
+        dialog.show(getFragmentManager(), "SortBooksDialog");
     }
 
     @Override

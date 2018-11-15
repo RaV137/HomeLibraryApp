@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (SharedPreferencesUtilities.getUserName(LoginActivity.this, SharedPreferencesUtilities.PREF_USER_NAME).length() == 0) {
+        if (SharedPreferencesUtilities.isUserLoggedIn(getBaseContext())) {
             successfulLogin();
         } else {
             setTitle("Logowanie");
@@ -197,8 +197,9 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                if(mCheckBox.isActivated()) {
-                    SharedPreferencesUtilities.setPreference(getBaseContext(), SharedPreferencesUtilities.PREF_USER_NAME, login);
+                if (mCheckBox.isActivated()) {
+                    SharedPreferencesUtilities.setLogin(getBaseContext(), login);
+                    SharedPreferencesUtilities.setAutologin(getBaseContext(), true);
                 }
                 successfulLogin();
             } else {

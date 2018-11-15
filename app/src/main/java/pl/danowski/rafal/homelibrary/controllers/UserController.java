@@ -86,7 +86,7 @@ public class UserController implements IUserController {
     }
 
     @Override
-    public void updateUserPasswort(Context context, String login, String encryptedPassword, boolean isOnline) {
+    public void updateUserPassword(Context context, String login, String encryptedPassword, boolean isOnline) {
         // TODO - replace with shot to API
 
         if (!isOnline) {

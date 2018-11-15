@@ -190,7 +190,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void updatePassword(final String login, final String password) {
         final String encryptedPassword = PasswordEncrypter.md5(password);
-        mUserController.updateUserPasswort(this, login, encryptedPassword, isOnline());
+        mUserController.updateUserPassword(this, login, encryptedPassword, isOnline());
     }
 
     public class SendEmailTask extends AsyncTask<Void, Void, Void> {
