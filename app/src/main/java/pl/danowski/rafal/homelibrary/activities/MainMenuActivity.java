@@ -97,8 +97,8 @@ public class MainMenuActivity extends AppCompatActivity {
                 .setMessage("Czy na pewno chcesz się wylogować?")
                 .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        SharedPreferencesUtilities.deleteLogin(getBaseContext());
-                        SharedPreferencesUtilities.setAutologin(getBaseContext(), false);
+                        SharedPreferencesUtilities.deleteLogin(getApplicationContext());
+                        SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);
                         finish();
                     }
                 })

@@ -3,11 +3,8 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,10 +16,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.UserController;
-import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
@@ -33,7 +30,7 @@ import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreference
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private IUserController mUserController;
+    private UserController mUserController;
 
     private UserLoginTask mAuthTask = null;
 
@@ -49,8 +46,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (SharedPreferencesUtilities.isUserLoggedIn(getBaseContext())) {
-            successfulLogin();
+        boolean userLoggedIn = SharedPreferencesUtilities.isUserLoggedIn(getApplicationContext());
+        Toast.makeText(getBaseContext(), String.valueOf(userLoggedIn), Toast.LENGTH_SHORT).show();
+
+        if (userLoggedIn) {
+            successfulLogin(SharedPreferencesUtilities.getLogin(getApplicationContext()));
         } else {
             setTitle("Logowanie");
 
@@ -179,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            LoginResult loginResult = mUserController.attemptLogin(getBaseContext(), login, mPassword, isOnline());
+            LoginResult loginResult = mUserController.attemptLogin(getBaseContext(), login, mPassword);
 
             try {
                 // Simulate network access.
@@ -198,10 +198,9 @@ public class LoginActivity extends AppCompatActivity {
 
             if (success) {
                 if (mCheckBox.isActivated()) {
-                    SharedPreferencesUtilities.setLogin(getBaseContext(), login);
-                    SharedPreferencesUtilities.setAutologin(getBaseContext(), true);
+                    SharedPreferencesUtilities.setAutologin(getApplicationContext(), true);
                 }
-                successfulLogin();
+                successfulLogin(login);
             } else {
                 mPasswordView.setError("Niepoprawny login lub hasło");
                 mPasswordView.setText("");
@@ -216,16 +215,15 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void successfulLogin() {
-        Intent intent = new Intent(this, AllBooksActivity.class);
-        startActivity(intent);
-    }
+    private void successfulLogin(String login) {
+        Toast.makeText(getBaseContext(), login, Toast.LENGTH_SHORT).show();
 
-    private boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
-        return (networkInfo != null && networkInfo.isConnected());
+        mLoginView.setText("");
+        mPasswordView.setText("");
+        mCheckBox.setActivated(false);
+        SharedPreferencesUtilities.setLogin(getApplicationContext(), login);
+        Intent intent = new Intent(this, MainMenuActivity.class);
+        startActivity(intent);
     }
 
     @Override

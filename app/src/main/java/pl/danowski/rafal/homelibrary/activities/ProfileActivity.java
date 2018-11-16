@@ -1,29 +1,27 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.UserController;
-import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
+import pl.danowski.rafal.homelibrary.dialogs.ChangeEmailDialog;
+import pl.danowski.rafal.homelibrary.dialogs.ChangePasswordDialog;
 import pl.danowski.rafal.homelibrary.model.User;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private TextView mEmailView;
-    private IUserController mUserController;
+    private UserController mUserController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +33,14 @@ public class ProfileActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("Home library");
 
-        String login = SharedPreferencesUtilities.getLogin(this);
+        String login = SharedPreferencesUtilities.getLogin(getApplicationContext());
         TextView mLoginView = findViewById(R.id.login);
         mLoginView.setText(login);
 
         mUserController = new UserController();
 
         mEmailView = findViewById(R.id.email);
-        User user = mUserController.findUserByLogin(this, login, isOnline());
+        User user = mUserController.findUserByLogin(this, login);
         assert user != null : ("Brak użytkownika o danym loginie: " + login);
         mEmailView.setText(user.getEmail());
 
@@ -75,10 +73,10 @@ public class ProfileActivity extends AppCompatActivity {
                 .setMessage("Czy na pewno chcesz usunąć konto? Tej decyzji nie można cofnąć.")
                 .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String login = SharedPreferencesUtilities.getLogin(getBaseContext());
-                        mUserController.deleteUser(getBaseContext(), login, isOnline());
-                        SharedPreferencesUtilities.deleteLogin(getBaseContext());
-                        SharedPreferencesUtilities.setAutologin(getBaseContext(), false);
+                        String login = SharedPreferencesUtilities.getLogin(getApplicationContext());
+                        mUserController.deleteUser(getBaseContext(), login);
+                        SharedPreferencesUtilities.deleteLogin(getApplicationContext());
+                        SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);
                         Intent intent = new Intent(getBaseContext(), LoginActivity.class);
                         startActivity(intent);
                     }
@@ -92,11 +90,14 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void changeEmail() {
-
+        DialogFragment dialog = new ChangeEmailDialog();
+        dialog.show(getFragmentManager(), "ChangePasswordDialog");
+        mEmailView.setText(mUserController.findUserByLogin(getBaseContext(), SharedPreferencesUtilities.getLogin(getApplicationContext())).getEmail());
     }
 
     private void changePassword() {
-
+        DialogFragment dialog = new ChangePasswordDialog();
+        dialog.show(getFragmentManager(), "ChangePasswordDialog");
     }
 
     @Override
@@ -104,10 +105,4 @@ public class ProfileActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
-    private boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
-        return (networkInfo != null && networkInfo.isConnected());
-    }
 }

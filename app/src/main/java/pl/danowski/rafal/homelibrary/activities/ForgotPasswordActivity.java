@@ -23,7 +23,6 @@ import javax.mail.internet.InternetAddress;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.UserController;
-import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.network.email.GMailSender;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.PasswordGenerator;
@@ -32,7 +31,7 @@ import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
 
-    private IUserController mUserController;
+    private UserController mUserController;
 
     private ForgotPasswordTask mAuthTask = null;
 
@@ -129,7 +128,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result = mUserController.isUserRegistered(getBaseContext(), login, email, isOnline());
+            boolean result = mUserController.isUserRegistered(getBaseContext(), login, email);
 
             try {
                 // Simulate network access.
@@ -190,7 +189,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void updatePassword(final String login, final String password) {
         final String encryptedPassword = PasswordEncrypter.md5(password);
-        mUserController.updateUserPassword(this, login, encryptedPassword, isOnline());
+        mUserController.updateUserPassword(this, login, encryptedPassword);
     }
 
     public class SendEmailTask extends AsyncTask<Void, Void, Void> {
@@ -228,13 +227,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private String generateNewPassword() {
         return PasswordGenerator.generate(12);
-    }
-
-    private boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
-        return (networkInfo != null && networkInfo.isConnected());
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)

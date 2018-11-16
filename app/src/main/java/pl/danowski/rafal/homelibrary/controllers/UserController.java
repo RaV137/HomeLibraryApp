@@ -12,13 +12,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import pl.danowski.rafal.homelibrary.controllers.interfaces.IUserController;
 import pl.danowski.rafal.homelibrary.model.User;
 import pl.danowski.rafal.homelibrary.network.NetworkSingleton;
+import pl.danowski.rafal.homelibrary.network.OnlineCheck;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
 import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
-public class UserController implements IUserController {
+public class UserController {
 
     private static List<User> mockUsers;
 
@@ -30,27 +30,37 @@ public class UserController implements IUserController {
         }
     }
 
-    public LoginResult attemptLogin(Context context, final String loginOrEmail, final String password, final boolean isOnline) {
+    public boolean checkPasswordForLogin(Context context, final String login, final String password) {
+        return confirmCredentials(context, login, password);
+    }
+
+    private boolean confirmCredentials(Context context, final String login, final String password) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
+                if (u.getPassword().equals(password)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public LoginResult attemptLogin(Context context, final String login, final String password) {
         // TODO - replace with shot to API
+
+        boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
             return LoginResult.CONNECTION_ERROR;
         }
 
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(loginOrEmail) || u.getEmail().equals(loginOrEmail)) {
-                if (u.getPassword().equals(password)) {
-                    return LoginResult.SUCCESS;
-                }
-            }
-        }
-
-        return LoginResult.FAILURE;
+        return confirmCredentials(context, login, password) ? LoginResult.SUCCESS : LoginResult.FAILURE;
     }
 
-    @Override
-    public RegistrationResult attemptRegistration(Context context, final String login, final String email, final String encryptedPassword, boolean isOnline) {
+    public RegistrationResult attemptRegistration(Context context, final String login, final String email, final String encryptedPassword) {
         // TODO - replace with shot to API
+
+        boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
             return RegistrationResult.CONNECTION_ERROR;
@@ -68,16 +78,17 @@ public class UserController implements IUserController {
         return RegistrationResult.SUCCESS;
     }
 
-    @Override
-    public boolean isUserRegistered(Context context, final String login, final String email, boolean isOnline) {
+    public boolean isUserRegistered(Context context, final String login, final String email) {
         // TODO - replace with shot to API
+
+        boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
             return false;
         }
 
-        for(User u : mockUsers) {
-            if(u.getLogin().equals(login) && u.getEmail().equals(email)) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login) && u.getEmail().equals(email)) {
                 return true;
             }
         }
@@ -85,29 +96,47 @@ public class UserController implements IUserController {
         return false;
     }
 
-    @Override
-    public void updateUserPassword(Context context, String login, String encryptedPassword, boolean isOnline) {
+    public void updateUserPassword(Context context, String login, String encryptedPassword) {
         // TODO - replace with shot to API
+
+        boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
             // TODO
         }
 
-        for(User u : mockUsers) {
-            if(u.getLogin().equals(login)) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
                 u.setPassword(encryptedPassword);
             }
         }
     }
 
-    @Override
-    public User findUserByLogin(Context context, String login, boolean isOnline) {
+    public void updateUserEmail(Context context, String login, String email) {
+        // TODO - replace with shot to API
+
+        boolean isOnline = OnlineCheck.isOnline(context);
+
+        if (!isOnline) {
+            // TODO
+        }
+
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
+                u.setEmail(email);
+            }
+        }
+    }
+
+    public User findUserByLogin(Context context, String login) {
+        boolean isOnline = OnlineCheck.isOnline(context);
+
         if (!isOnline) {
             return null;
         }
 
-        for(User u : mockUsers) {
-            if(u.getLogin().equals(login)) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
                 return u;
             }
         }
@@ -115,14 +144,15 @@ public class UserController implements IUserController {
         return null;
     }
 
-    @Override
-    public void deleteUser(Context baseContext, String login, boolean online) {
-        if (!online) {
+    public void deleteUser(Context context, String login) {
+        boolean isOnline = OnlineCheck.isOnline(context);
+
+        if (!isOnline) {
             // TODO
         }
 
-        for(User u : mockUsers) {
-            if(u.getLogin().equals(login)) {
+        for (User u : mockUsers) {
+            if (u.getLogin().equals(login)) {
                 mockUsers.remove(u);
             }
         }
