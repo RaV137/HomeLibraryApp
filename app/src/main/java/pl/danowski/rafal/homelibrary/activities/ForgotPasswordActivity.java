@@ -129,7 +129,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result = mUserController.findUser(getBaseContext(), login, email, isOnline());
+            boolean result = mUserController.isUserRegistered(getBaseContext(), login, email, isOnline());
 
             try {
                 // Simulate network access.

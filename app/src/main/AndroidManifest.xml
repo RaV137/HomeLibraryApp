@@ -15,10 +15,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".MainMenuActivity"
+            android:name=".activities.MainMenuActivity"
             android:configChanges="orientation"
-            android:parentActivityName=".activities.LoginActivity"
             android:label="@string/app_name"
+            android:parentActivityName=".activities.LoginActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.AllBooksActivity"
@@ -49,7 +49,12 @@
             android:label="@string/app_name"
             android:parentActivityName=".activities.LoginActivity"
             android:theme="@style/AppTheme" />
-
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:parentActivityName=".activities.MainMenuActivity"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

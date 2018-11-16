@@ -69,7 +69,7 @@ public class UserController implements IUserController {
     }
 
     @Override
-    public boolean findUser(Context context, final String login, final String email, boolean isOnline) {
+    public boolean isUserRegistered(Context context, final String login, final String email, boolean isOnline) {
         // TODO - replace with shot to API
 
         if (!isOnline) {
@@ -98,6 +98,36 @@ public class UserController implements IUserController {
                 u.setPassword(encryptedPassword);
             }
         }
+    }
+
+    @Override
+    public User findUserByLogin(Context context, String login, boolean isOnline) {
+        if (!isOnline) {
+            return null;
+        }
+
+        for(User u : mockUsers) {
+            if(u.getLogin().equals(login)) {
+                return u;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void deleteUser(Context baseContext, String login, boolean online) {
+        if (!online) {
+            // TODO
+        }
+
+        for(User u : mockUsers) {
+            if(u.getLogin().equals(login)) {
+                mockUsers.remove(u);
+            }
+        }
+
+        throw new RuntimeException();
     }
 
     private void addNewRequest(Context context, String url) {
