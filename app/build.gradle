@@ -21,6 +21,10 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
@@ -38,4 +42,6 @@ dependencies {
     implementation files('src/main/libs/activation.jar')
     implementation files('src/main/libs/additionnal.jar')
     implementation files('src/main/libs/mail.jar')
+
+    compile 'com.google.apis:google-api-services-books:v1-rev104-1.25.0'
 }

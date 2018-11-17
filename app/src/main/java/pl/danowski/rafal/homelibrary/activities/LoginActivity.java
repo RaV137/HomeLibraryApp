@@ -45,19 +45,22 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+    }
 
-        boolean userLoggedIn = SharedPreferencesUtilities.isUserLoggedIn(getApplicationContext());
-        Toast.makeText(getBaseContext(), String.valueOf(userLoggedIn), Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-        if (userLoggedIn) {
+        mLoginView = findViewById(R.id.textLogin);
+        mPasswordView = findViewById(R.id.textPassword);
+        mCheckBox = findViewById(R.id.rememberMe);
+
+        if (SharedPreferencesUtilities.isUserLoggedIn(getApplicationContext())) {
             successfulLogin(SharedPreferencesUtilities.getLogin(getApplicationContext()));
         } else {
             setTitle("Logowanie");
 
             mUserController = new UserController();
-            mLoginView = findViewById(R.id.textLogin);
-            mPasswordView = findViewById(R.id.textPassword);
-            mCheckBox = findViewById(R.id.rememberMe);
 
             Button mSignInButton = findViewById(R.id.loginButton);
             mSignInButton.setOnClickListener(new OnClickListener() {
@@ -197,7 +200,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                if (mCheckBox.isActivated()) {
+                if (mCheckBox.isChecked()) {
                     SharedPreferencesUtilities.setAutologin(getApplicationContext(), true);
                 }
                 successfulLogin(login);
@@ -216,8 +219,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void successfulLogin(String login) {
-        Toast.makeText(getBaseContext(), login, Toast.LENGTH_SHORT).show();
-
         mLoginView.setText("");
         mPasswordView.setText("");
         mCheckBox.setActivated(false);

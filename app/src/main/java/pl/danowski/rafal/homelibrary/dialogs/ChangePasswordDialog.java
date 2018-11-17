@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.UserController;
@@ -91,6 +92,7 @@ public class ChangePasswordDialog extends DialogFragment {
 
                     if (exit) {
                         userController.updateUserPassword(getActivity().getBaseContext(), login, PasswordEncrypter.md5(newPassword));
+                        Toast.makeText(getActivity().getBaseContext(), "Udało się zmienić hasło", Toast.LENGTH_SHORT).show();
                         d.dismiss();
                     } else {
                         focusView.requestFocus();

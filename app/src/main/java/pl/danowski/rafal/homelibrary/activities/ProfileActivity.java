@@ -90,9 +90,16 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void changeEmail() {
-        DialogFragment dialog = new ChangeEmailDialog();
+        ChangeEmailDialog dialog = new ChangeEmailDialog();
+        dialog.setDialogResult(new ChangeEmailDialog.OnMyDialogResult(){
+            public void finish(boolean success, String email){
+                if (success) {
+                    mEmailView.setText(email);
+                }
+            }
+        });
         dialog.show(getFragmentManager(), "ChangePasswordDialog");
-        mEmailView.setText(mUserController.findUserByLogin(getBaseContext(), SharedPreferencesUtilities.getLogin(getApplicationContext())).getEmail());
+//        mEmailView.setText(mUserController.findUserByLogin(getBaseContext(), SharedPreferencesUtilities.getLogin(getApplicationContext())).getEmail());
     }
 
     private void changePassword() {

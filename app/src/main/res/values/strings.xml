@@ -46,7 +46,7 @@
     <string name="new_password">Nowe hasło</string>
     <string name="confirm_new_password">Potwierdź nowe hasło</string>
     <string name="new_email">Nowy email</string>
-    <string name="confirm_identity">Hasło</string>
+    <string name="confirm_identity">Potwierdź tożsamość</string>
     <string name="rule_password">Hasło musi zawierać małe i duże litery, min. 1 cyfrę oraz min. 1 znak specjalny, nie posiadać białych znaków oraz mieć minimum 8 znaków</string>
     <string name="rule_login">Login powinien mieć minimum 5 i maksimum 20 znaków i posiadać tylko małe i duże litery oraz cyfry</string>
     <string name="rule_email">Zły format adresu email</string>

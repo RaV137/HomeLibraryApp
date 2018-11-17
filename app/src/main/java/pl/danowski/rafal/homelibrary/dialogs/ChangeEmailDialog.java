@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.controllers.UserController;
@@ -19,6 +20,8 @@ import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreference
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class ChangeEmailDialog extends DialogFragment {
+
+    private OnMyDialogResult mDialogResult; // the callback
 
     @SuppressLint("InflateParams")
     @Override
@@ -53,7 +56,7 @@ public class ChangeEmailDialog extends DialogFragment {
                     View focusView = null;
                     UserController userController = new UserController();
 
-                    EditText mEmail = d.findViewById(R.id.email);
+                    EditText mEmail = d.findViewById(R.id.newEmail);
                     EditText mPassword = d.findViewById(R.id.password);
 
                     String email = mEmail.getText().toString();
@@ -69,7 +72,7 @@ public class ChangeEmailDialog extends DialogFragment {
                         focusView = mPassword;
                         mPassword.setError("Pole wymagane");
                         exit = false;
-                    } else if (!userController.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(email))) {
+                    } else if (!userController.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(password))) {
                         focusView = mPassword;
                         mPassword.setError("Niepoprawne hasło");
                         exit = false;
@@ -81,6 +84,10 @@ public class ChangeEmailDialog extends DialogFragment {
 
                     if (exit) {
                         userController.updateUserEmail(getActivity().getBaseContext(), login, email);
+                        Toast.makeText(getActivity().getBaseContext(), "Udało się zmienić adres email", Toast.LENGTH_SHORT).show();
+                        if( mDialogResult != null ){
+                            mDialogResult.finish(true, email);
+                        }
                         d.dismiss();
                     } else {
                         focusView.requestFocus();
@@ -88,5 +95,13 @@ public class ChangeEmailDialog extends DialogFragment {
                 }
             });
         }
+    }
+
+    public void setDialogResult(OnMyDialogResult dialogResult){
+        mDialogResult = dialogResult;
+    }
+
+    public interface OnMyDialogResult{
+        void finish(boolean success, String email);
     }
 }

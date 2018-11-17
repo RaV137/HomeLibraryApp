@@ -26,6 +26,8 @@ public class MainMenuActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(false);
         actionBar.setTitle("Home library");
 
+        boolean userLoggedIn = SharedPreferencesUtilities.isUserLoggedIn(getApplicationContext());
+
         Button myBooksButton = findViewById(R.id.myBooks);
         myBooksButton.setOnClickListener(new View.OnClickListener() {
             @Override

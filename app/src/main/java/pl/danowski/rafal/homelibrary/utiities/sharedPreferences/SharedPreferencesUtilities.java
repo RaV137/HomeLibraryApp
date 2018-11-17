@@ -3,6 +3,7 @@ package pl.danowski.rafal.homelibrary.utiities.sharedPreferences;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 public class SharedPreferencesUtilities {
@@ -33,7 +34,7 @@ public class SharedPreferencesUtilities {
         if (isEmpty(autologin)) {
             return false;
         } else {
-            return Boolean.getBoolean(autologin) && isSavedLogin(applicationContext);
+            return Boolean.valueOf(autologin) && isSavedLogin(applicationContext);
         }
     }
 
@@ -45,15 +46,23 @@ public class SharedPreferencesUtilities {
         return !isEmpty(getLogin(applicationContext));
     }
 
-    private static String getPreference(Context applicationContext, String key) {
-        return applicationContext.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).getString(key, "");
+    private static String getPreference(Context context, String key) {
+        String value = "";
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            value = preferences.getString(key, "");
+        }
+        return value;
     }
 
-    @SuppressLint("ApplySharedPref")
-    private static void setPreference(Context applicationContext, String key, String value) {
-        SharedPreferences.Editor editor = applicationContext.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
-        editor.putString(key, value);
-//        editor.apply();
-        editor.commit();
+    private static void setPreference(Context context, String key, String value) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null && !TextUtils.isEmpty(key)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(key, value);
+            editor.apply();
+        }
     }
+
+
 }
