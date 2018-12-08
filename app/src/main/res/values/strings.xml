@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="Typos">
     <string name="app_name">HomeLibrary</string>
     <string name="menu_sort">Sortuj</string>
 
@@ -38,5 +38,16 @@
     <string name="my_books">Moje książki</string>
     <string name="settings">Ustawienia</string>
     <string name="log_out">Wyloguj</string>
-    <string name="shelf">półka</string>
+    <string name="profile_pic">Profile pic</string>
+    <string name="change_password">Zmnień hasło</string>
+    <string name="change_email">Zmień adres email</string>
+    <string name="delete_account">Usuń konto</string>
+    <string name="old_password">Stare hasło</string>
+    <string name="new_password">Nowe hasło</string>
+    <string name="confirm_new_password">Potwierdź nowe hasło</string>
+    <string name="new_email">Nowy email</string>
+    <string name="confirm_identity">Potwierdź tożsamość</string>
+    <string name="rule_password">Hasło musi zawierać małe i duże litery, min. 1 cyfrę oraz min. 1 znak specjalny, nie posiadać białych znaków oraz mieć minimum 8 znaków</string>
+    <string name="rule_login">Login powinien mieć minimum 5 i maksimum 20 znaków i posiadać tylko małe i duże litery oraz cyfry</string>
+    <string name="rule_email">Zły format adresu email</string>
 </resources>

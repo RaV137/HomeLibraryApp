@@ -1,5 +1,6 @@
 package pl.danowski.rafal.homelibrary.utiities.sharedPreferences;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -7,35 +8,33 @@ import android.text.TextUtils;
 
 public class SharedPreferencesUtilities {
 
+    private static final String SHARED_PREFERENCES_FILE = " pl.danowski.rafal.homelibrary.PREFERENCES";
+
     private static final String LOGIN = "login";
     private static final String AUTOLOGIN = "autologin";
 
-    private static SharedPreferences getSharedPreferences(Context ctx) {
-        return PreferenceManager.getDefaultSharedPreferences(ctx);
+    public static void setLogin(Context applicationContext, String login) {
+        setPreference(applicationContext, LOGIN, login);
     }
 
-    public static void setLogin(Context ctx, String login) {
-        setPreference(ctx, LOGIN, login);
+    public static void deleteLogin(Context applicationContext) {
+        setLogin(applicationContext, "");
     }
 
-    public static void deleteLogin(Context context) {
-        setLogin(context, "");
+    public static String getLogin(Context applicationContext) {
+        return getPreference(applicationContext, LOGIN);
     }
 
-    public static String getLogin(Context context) {
-        return getPreference(context, LOGIN);
+    public static void setAutologin(Context applicationContext, boolean autologin) {
+        setPreference(applicationContext, AUTOLOGIN, String.valueOf(autologin));
     }
 
-    public static void setAutologin(Context context, boolean autologin) {
-        setPreference(context, AUTOLOGIN, String.valueOf(autologin));
-    }
-
-    public static boolean isUserLoggedIn(Context context) {
-        String autologin = getPreference(context, AUTOLOGIN);
+    public static boolean isUserLoggedIn(Context applicationContext) {
+        String autologin = getPreference(applicationContext, AUTOLOGIN);
         if (isEmpty(autologin)) {
             return false;
         } else {
-            return Boolean.getBoolean(autologin) && isSavedLogin(context);
+            return Boolean.valueOf(autologin) && isSavedLogin(applicationContext);
         }
     }
 
@@ -43,17 +42,27 @@ public class SharedPreferencesUtilities {
         return TextUtils.isEmpty(s);
     }
 
-    private static boolean isSavedLogin(Context context) {
-        return !isEmpty(getLogin(context));
+    private static boolean isSavedLogin(Context applicationContext) {
+        return !isEmpty(getLogin(applicationContext));
     }
 
-    private static String getPreference(Context ctx, String key) {
-        return getSharedPreferences(ctx).getString(key, "");
+    private static String getPreference(Context context, String key) {
+        String value = "";
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            value = preferences.getString(key, "");
+        }
+        return value;
     }
 
-    private static void setPreference(Context ctx, String key, String value) {
-        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
-        editor.putString(key, value);
-        editor.apply();
+    private static void setPreference(Context context, String key, String value) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null && !TextUtils.isEmpty(key)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(key, value);
+            editor.apply();
+        }
     }
+
+
 }
