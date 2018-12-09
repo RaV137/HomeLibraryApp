@@ -78,7 +78,7 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/settings"
+            android:text="@string/search"
             tools:ignore="ButtonStyle,NestedWeights" />
 
 

@@ -1,24 +1,21 @@
 package pl.danowski.rafal.homelibrary.activities;
 
-import android.app.DialogFragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import pl.danowski.rafal.homelibrary.R;
 //import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
 //import pl.danowski.rafal.homelibrary.utiities.BookUtility;
 
-public class AllBooksActivity extends AppCompatActivity {
+public class BooksActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all_books);
+        setContentView(R.layout.activity_books);
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         assert actionBar != null : "ActionBar is null!";

@@ -1,12 +1,11 @@
 package pl.danowski.rafal.homelibrary.model.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Getter
-@Setter
-public class User {
-    private Integer id;
+@Data
+@AllArgsConstructor
+public class CreateUser {
     private String login;
     private String email;
     private String password;

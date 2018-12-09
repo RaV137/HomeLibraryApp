@@ -103,7 +103,7 @@ public class ChangePasswordDialog extends DialogFragment {
                 focusView = mConfirmNewPassword;
                 mConfirmNewPassword.setError("Pole wymagane");
                 exit = false;
-            } else if (!userService.checkPasswordForLogin(login, PasswordEncrypter.md5(oldPassword))) {
+            } else if (!userService.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(oldPassword))) {
                 focusView = mOldPassword;
                 mOldPassword.setError("Niepoprawne hasło");
                 exit = false;

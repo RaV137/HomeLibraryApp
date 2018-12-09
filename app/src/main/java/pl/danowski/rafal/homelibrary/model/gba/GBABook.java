@@ -13,11 +13,9 @@ public class GBABook {
 
     private String id;
     private String title;
-    private String subtitle;
     private String author;
     private String publisher;
     private String publishedYear;
-    private String description;
     private String isbn13;
     private Integer pageCount;
     private String smallThumbnailURL;

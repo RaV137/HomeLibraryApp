@@ -3,7 +3,6 @@
     <string name="menu_sort">Sortuj</string>
 
     <string name="all_books_activity_title">Twoje książki</string>
-
     <string name="book_sort_main_text">Sortowanie</string>
     <string name="book_sort_title_asc">Tytuł A-Z</string>
     <string name="book_sort_title_desc">Tytuł Z-A</string>
@@ -12,8 +11,6 @@
     <string name="book_sort_score_desc">Ocena malejąco</string>
     <string name="book_sort_score_asc">Ocena rosnąco</string>
     <string name="title_activity_login">Logowanie</string>
-
-    <!-- Strings related to login -->
     <string name="login_prompt_login">Login</string>
     <string name="login_prompt_password">Hasło</string>
     <string name="action_sign_in">Zaloguj</string>
@@ -36,7 +33,7 @@
     <string name="profile">Profil</string>
     <string name="my_rooms">Moje pokoje</string>
     <string name="my_books">Moje książki</string>
-    <string name="settings">Ustawienia</string>
+    <string name="search">Szukaj</string>
     <string name="log_out">Wyloguj</string>
     <string name="profile_pic">Profile pic</string>
     <string name="change_password">Zmnień hasło</string>
@@ -51,4 +48,6 @@
     <string name="rule_login">Login powinien mieć minimum 5 i maksimum 20 znaków i posiadać tylko małe i duże litery oraz cyfry</string>
     <string name="rule_email">Zły format adresu email</string>
     <string name="shelf">Półka</string>
+    <string name="edit">Edytuj</string>
+    <string name="delete">Usuń</string>
 </resources>

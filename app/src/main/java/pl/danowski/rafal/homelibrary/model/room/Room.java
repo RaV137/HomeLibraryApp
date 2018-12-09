@@ -11,5 +11,5 @@ public class Room {
     private String name;
     private String colour;
     private String shortName;
-    private String userId;
+    private Integer userId;
 }

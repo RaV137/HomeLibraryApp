@@ -19,7 +19,6 @@ public final class SendEmailTask extends AsyncTask<Void, Void, Void> {
         this.context = context;
     }
 
-
     @Override
     protected Void doInBackground(Void... voids) {
         try {

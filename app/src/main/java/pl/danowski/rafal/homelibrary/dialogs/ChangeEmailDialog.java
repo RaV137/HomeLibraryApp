@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -97,7 +98,7 @@ public class ChangeEmailDialog extends DialogFragment {
                 focusView = mPassword;
                 mPassword.setError("Pole wymagane");
                 exit = false;
-            } else if (!userService.checkPasswordForLogin(login, PasswordEncrypter.md5(password))) {
+            } else if (!userService.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(password))) {
                 focusView = mPassword;
                 mPassword.setError("Niepoprawne hasło");
                 exit = false;
@@ -125,15 +126,14 @@ public class ChangeEmailDialog extends DialogFragment {
         }
     }
 
-    private void sendEmailEmailChanged(final String email, final String newEmail) {
+    private void sendEmailEmailChanged(Context context, final String email, final String newEmail) {
         final String body = "Witaj!\nWłaśnie zmieniłeś swój adres email w aplikacji HomeLibrary." +
                 "\n\nTwój nowy email to: " + newEmail +
                 "\n\nJeśli to nie Ty się dokonałeś tej zmiany, skontaktuj się z nami.\nPozdrawiamy\nZespół HomeLibrary";
         final String subject = "Zmiana adresu email w aplikacji HomeLibrary";
-        SendEmailTask task = new SendEmailTask(body, subject, email, getActivity().getBaseContext());
+        SendEmailTask task = new SendEmailTask(body, subject, email, context);
         task.execute((Void) null);
     }
-
 
     public class UpdateEmailTask extends AsyncTask<Void, Void, Void> {
 
@@ -147,10 +147,11 @@ public class ChangeEmailDialog extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            User user = userService.findUserByLogin(getActivity().getBaseContext(), login);
+            Context context = getActivity().getBaseContext();
+            User user = userService.findUserByLogin(context, login); // TODO co z tym kontekstem?
             String oldEmail = user.getEmail();
-            sendEmailEmailChanged(oldEmail, email);
-            userService.updateUserEmail(getActivity().getBaseContext(), login, email);
+            sendEmailEmailChanged(context, oldEmail, email);
+            userService.updateUserEmail(context, login, email);
             return null;
         }
     }
