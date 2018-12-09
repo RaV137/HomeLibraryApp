@@ -50,4 +50,5 @@
     <string name="rule_password">Hasło musi zawierać małe i duże litery, min. 1 cyfrę oraz min. 1 znak specjalny, nie posiadać białych znaków oraz mieć minimum 8 znaków</string>
     <string name="rule_login">Login powinien mieć minimum 5 i maksimum 20 znaków i posiadać tylko małe i duże litery oraz cyfry</string>
     <string name="rule_email">Zły format adresu email</string>
+    <string name="shelf">Półka</string>
 </resources>

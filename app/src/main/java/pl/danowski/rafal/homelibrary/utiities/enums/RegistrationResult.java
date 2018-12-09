@@ -7,8 +7,7 @@ import lombok.Getter;
 @Getter
 public enum RegistrationResult {
     SUCCESS("Poprawna rejestracja"),
-    LOGIN_ALREADY_EXISTS("Login jest używany przez innego użytkownika"),
-    EMAIL_ALREADY_EXISTS("Email jest używany przez innego użytkownika"),
+    USER_ALREADY_EXISTS("Login lub email jest już używany przez innego użytkownika"),
     CONNECTION_ERROR("Błąd połączenia z serwerem");
 
     private String text;

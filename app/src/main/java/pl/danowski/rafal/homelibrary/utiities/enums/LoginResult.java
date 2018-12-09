@@ -1,15 +1,14 @@
 package pl.danowski.rafal.homelibrary.utiities.enums;
 
-public enum LoginResult {
-    SUCCESS("Udało się zalogować"), FAILURE("Niepoprawne dane"), CONNECTION_ERROR("Błąd połączenia z serwerem");
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    private LoginResult(String text) {
-        this.text = text;
-    }
+@AllArgsConstructor
+@Getter
+public enum LoginResult {
+    SUCCESS("Udało się zalogować"),
+    FAILURE("Niepoprawne dane"),
+    CONNECTION_ERROR("Błąd połączenia z serwerem");
 
     private String text;
-
-    public String getText() {
-        return text;
-    }
 }

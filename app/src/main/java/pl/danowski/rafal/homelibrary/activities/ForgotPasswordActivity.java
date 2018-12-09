@@ -3,10 +3,7 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,8 +19,9 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.controllers.UserController;
 import pl.danowski.rafal.homelibrary.network.email.GMailSender;
+import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
+import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.PasswordGenerator;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
@@ -31,7 +29,7 @@ import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
 
-    private UserController mUserController;
+    private UserService mUserService;
 
     private ForgotPasswordTask mAuthTask = null;
 
@@ -39,7 +37,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private EditText mEmailView;
     private View mProgressView;
     private View mForgotPasswordFormView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +54,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         mForgotPasswordFormView = findViewById(R.id.forgot_password_form);
         mProgressView = findViewById(R.id.forgot_password_progress);
-        mUserController = new UserController();
+        mUserService = new UserService();
 
         Button mForgotPasswordButton = findViewById(R.id.forgotPasswordButton);
         mForgotPasswordButton.setOnClickListener(new View.OnClickListener() {
@@ -128,16 +125,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result = mUserController.isUserRegistered(getBaseContext(), login, email);
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            return result;
+            return mUserService.isUserRegistered(getBaseContext(), login, email);
         }
 
         @Override
@@ -147,8 +135,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
             if (success) {
                 final String password = generateNewPassword();
-                SendEmailTask sendEmailTask = new SendEmailTask(email, password);
-                sendEmailTask.execute((Void) null);
+                sendEmailWithNewCredentials(email, password);
                 UpdatePasswordTask updatePasswordTask = new UpdatePasswordTask(login, password);
                 updatePasswordTask.execute((Void) null);
                 showConfirmationToast();
@@ -189,40 +176,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void updatePassword(final String login, final String password) {
         final String encryptedPassword = PasswordEncrypter.md5(password);
-        mUserController.updateUserPassword(this, login, encryptedPassword);
-    }
-
-    public class SendEmailTask extends AsyncTask<Void, Void, Void> {
-
-        private final String email;
-        private final String password;
-
-        public SendEmailTask(String email, String password) {
-            this.email = email;
-            this.password = password;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            sendEmailWithNewCredentials(email, password);
-            return null;
-        }
+        mUserService.updateUserPassword(this, login, encryptedPassword);
     }
 
     private void sendEmailWithNewCredentials(final String email, final String password) {
-        try {
-            GMailSender sender = new GMailSender();
-            sender.sendMail("Przypomnienie hasła w aplikacji HomeLibrary",
-                    "Witaj!\nWłaśnie wygenerowaliśmy Ci nowe hasło do aplikacji HomeLibrary." +
-                            "\n\nTwoje nowe hasło: " + password +
-                            "\n\nJeśli to nie Ty resetowałeś hasło w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary",
-                    "home.library.dev@gmail.com",
-                    email);
-        } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong, contact me with email home.library.dev@gmail.com", Toast.LENGTH_LONG).show();
-            Log.e("SendMail", e.getMessage(), e);
-            throw new RuntimeException("sendAnEmailWithLoginCredentials: " + e.getMessage());
-        }
+        final String body = "Witaj!\nWłaśnie wygenerowaliśmy Ci nowe hasło do aplikacji HomeLibrary." +
+                "\n\nTwoje nowe hasło: " + password +
+                "\n\nJeśli to nie Ty resetowałeś hasło w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary";
+        final String subject = "Przypomnienie hasła w aplikacji HomeLibrary";
+        SendEmailTask task = new SendEmailTask(body, subject, email, this);
+        task.execute((Void) null);
     }
 
     private String generateNewPassword() {

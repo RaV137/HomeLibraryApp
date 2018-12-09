@@ -16,10 +16,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.controllers.UserController;
+import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
@@ -30,7 +29,7 @@ import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreference
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private UserController mUserController;
+    private UserService mUserService;
 
     private UserLoginTask mAuthTask = null;
 
@@ -60,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             setTitle("Logowanie");
 
-            mUserController = new UserController();
+            mUserService = new UserService();
 
             Button mSignInButton = findViewById(R.id.loginButton);
             mSignInButton.setOnClickListener(new OnClickListener() {
@@ -182,15 +181,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            LoginResult loginResult = mUserController.attemptLogin(getBaseContext(), login, mPassword);
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
+            LoginResult loginResult = mUserService.attemptLogin(getBaseContext(), login, mPassword);
             return loginResult.equals(LoginResult.SUCCESS);
         }
 

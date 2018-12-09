@@ -10,8 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
-import pl.danowski.rafal.homelibrary.utiities.BookUtility;
+//import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
+//import pl.danowski.rafal.homelibrary.utiities.BookUtility;
 
 public class AllBooksActivity extends AppCompatActivity {
 
@@ -25,21 +25,21 @@ public class AllBooksActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.all_books_activity_title);
 
-        BookUtility.initialize(findViewById(R.id.allBooksLayout));
-        BookUtility.printBooks();
+//        BookUtility.initialize(findViewById(R.id.allBooksLayout));
+//        BookUtility.printBooks();
 
-        FloatingActionButton fab = findViewById(R.id.addBook);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addBook();
-            }
-        });
+//        FloatingActionButton fab = findViewById(R.id.addBook);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                addBook();
+//            }
+//        });
     }
 
-    private void addBook() {
-        BookUtility.addBind();
-    }
+//    private void addBook() {
+//        BookUtility.addBind();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -61,8 +61,8 @@ public class AllBooksActivity extends AppCompatActivity {
     }
 
     private void sort() {
-        DialogFragment dialog = new SortBooksDialog();
-        dialog.show(getFragmentManager(), "SortBooksDialog");
+//        DialogFragment dialog = new SortBooksDialog();
+//        dialog.show(getFragmentManager(), "SortBooksDialog");
     }
 
     @Override

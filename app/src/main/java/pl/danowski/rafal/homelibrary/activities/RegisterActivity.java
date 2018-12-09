@@ -3,10 +3,7 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,15 +16,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.controllers.UserController;
 import pl.danowski.rafal.homelibrary.network.email.GMailSender;
+import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
+import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
@@ -35,7 +27,7 @@ import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private UserController mUserController;
+    private UserService mUserService;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -57,7 +49,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         setTitle("Rejestracja");
 
-        this.mUserController = new UserController();
+        this.mUserService = new UserService();
         String login = getIntent().getStringExtra(IntentExtras.LOGIN.getName());
 
         mLoginView = findViewById(R.id.textLogin);
@@ -166,40 +158,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void sendAnEmailWithLoginCredentials(final String login, final String email, final String password) {
-        try {
-            GMailSender sender = new GMailSender();
-            sender.sendMail("Rejestracja konta w aplikacji HomeLibrary",
-                    "Witaj!\nWłaśnie zarejestrowałeś się w aplikacji HomeLibrary." +
-                            "\n\nTwoje dane logowania:\nLogin: " + login + "\nHasło: " + password + "" +
-                            "\n\nJeśli to nie Ty się rejestrowałeś w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary",
-                    "home.library.dev@gmail.com",
-                    email);
-        } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong, contact me with email home.library.dev@gmail.com", Toast.LENGTH_LONG).show();
-            Log.e("SendMail", e.getMessage(), e);
-            throw new RuntimeException("sendAnEmailWithLoginCredentials: " + e.getMessage());
-        }
-    }
-
-    public class SendEmailTask extends AsyncTask<Void, Void, Void> {
-
-        private final String login;
-        private final String email;
-        private final String password;
-
-        SendEmailTask(String login, String email, String password) {
-            this.login = login;
-            this.email = email;
-            this.password = password;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            sendAnEmailWithLoginCredentials(login, email, password);
-
-            return null;
-        }
+        final String body = "Witaj!\nWłaśnie zarejestrowałeś się w aplikacji HomeLibrary." +
+                "\n\nTwoje dane logowania:\nLogin: " + login + "\nHasło: " + password + "" +
+                "\n\nJeśli to nie Ty się rejestrowałeś w aplikacji, zignoruj tego maila.\nPozdrawiamy\nZespół HomeLibrary";
+        final String subject = "Rejestracja konta w aplikacji HomeLibrary";
+        SendEmailTask task = new SendEmailTask(body, subject, email, this);
+        task.execute((Void) null);
     }
 
     public class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
@@ -220,16 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-
-            registrationResult = mUserController.attemptRegistration(getBaseContext(), login, email, encryptedPassword);
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
+            registrationResult = mUserService.attemptRegistration(getBaseContext(), login, email, encryptedPassword);
             return registrationResult.equals(RegistrationResult.SUCCESS);
         }
 
@@ -239,8 +194,7 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                SendEmailTask task = new SendEmailTask(login, email, password);
-                task.execute((Void) null);
+                sendAnEmailWithLoginCredentials(login, email, password);
                 showConfirmationToast();
                 finish();
             } else {
@@ -248,13 +202,9 @@ public class RegisterActivity extends AppCompatActivity {
                     case CONNECTION_ERROR:
 //                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
                         break;
-                    case LOGIN_ALREADY_EXISTS:
+                    case USER_ALREADY_EXISTS:
                         mLoginView.setError(registrationResult.getText());
                         mLoginView.requestFocus();
-                        break;
-                    case EMAIL_ALREADY_EXISTS:
-                        mEmailView.setError(registrationResult.getText());
-                        mEmailView.requestFocus();
                         break;
                     default:
 //                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();

@@ -1,182 +1,151 @@
 package pl.danowski.rafal.homelibrary.controllers;
 
-import android.content.Context;
+import com.google.gson.Gson;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
-import org.json.JSONObject;
+import pl.danowski.rafal.homelibrary.model.user.User;
 
-import java.util.ArrayList;
-import java.util.List;
+// TODO: poczyścić, zostawić tylko bezpośrednie odwołania do API, resztę wywalić do serwisu (ma zostać: create, delete, update, getByEmail, getByLogin)
 
-import pl.danowski.rafal.homelibrary.model.User;
-import pl.danowski.rafal.homelibrary.network.NetworkSingleton;
-import pl.danowski.rafal.homelibrary.network.OnlineCheck;
-import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
-import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
-
+@SuppressWarnings("ALL")
 public class UserController {
 
-    private static List<User> mockUsers;
+    private RestTemplate mRestTemplate = new RestTemplate();
 
-    public UserController() {
-        if (mockUsers == null) {
-            mockUsers = new ArrayList<>();
-            mockUsers.add(new User("admin", "e00cf25ad42683b3df678c61f42c6bda",
-                    "Admin", "Adminowski", false, "adminadminowski@yopmail.com"));
-        }
+    private final String URL_BASE = "http://192.168.1.28:8080";
+
+    private final String REGISTER_USER_ULR = URL_BASE + "/users";
+    private final String DELETE_UPDATE_USER_ULR = URL_BASE + "/users/";
+    private final String FIND_USER_BY_EMAIL_URL = URL_BASE + "/users/email/";
+    private final String FIND_USER_BY_LOGIN_URL = URL_BASE + "/users/login/";
+
+    private String getDeleteUpdateUserUrl(String login) {
+        return DELETE_UPDATE_USER_ULR + login;
     }
 
-    public boolean checkPasswordForLogin(Context context, final String login, final String password) {
-        return confirmCredentials(context, login, password);
+    private String getFindUserByEmailUrl(String email) {
+        return FIND_USER_BY_EMAIL_URL + email;
     }
 
-    private boolean confirmCredentials(Context context, final String login, final String password) {
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                if (u.getPassword().equals(password)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private String getFindUserByLoginUrl(String login) {
+        return FIND_USER_BY_LOGIN_URL + login;
     }
 
-    public LoginResult attemptLogin(Context context, final String login, final String password) {
-        // TODO - replace with shot to API
-
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return LoginResult.CONNECTION_ERROR;
-        }
-
-        return confirmCredentials(context, login, password) ? LoginResult.SUCCESS : LoginResult.FAILURE;
-    }
-
-    public RegistrationResult attemptRegistration(Context context, final String login, final String email, final String encryptedPassword) {
-        // TODO - replace with shot to API
-
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return RegistrationResult.CONNECTION_ERROR;
-        }
-
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                return RegistrationResult.LOGIN_ALREADY_EXISTS;
-            } else if (u.getEmail().equals(email)) {
-                return RegistrationResult.EMAIL_ALREADY_EXISTS;
-            }
-        }
-
-        mockUsers.add(new User(login, encryptedPassword, "", "", false, email));
-        return RegistrationResult.SUCCESS;
-    }
-
-    public boolean isUserRegistered(Context context, final String login, final String email) {
-        // TODO - replace with shot to API
-
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
+    public boolean confirmCredentials(final String login, final String password) {
+        User user = findUserByLogin(login);
+        if (user == null) {
             return false;
         }
 
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login) && u.getEmail().equals(email)) {
-                return true;
-            }
-        }
-
-        return false;
+        return password.equals(user.getPassword());
     }
 
-    public void updateUserPassword(Context context, String login, String encryptedPassword) {
-        // TODO - replace with shot to API
+    public boolean createUser(User user) {
+        mRestTemplate = new RestTemplate();
+        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        ResponseEntity<User> exchange = mRestTemplate.exchange(REGISTER_USER_ULR, HttpMethod.POST, new HttpEntity<>(user), User.class);
+        HttpStatus statusCode = exchange.getStatusCode();
 
-        boolean isOnline = OnlineCheck.isOnline(context);
+        return statusCode != HttpStatus.OK;
+    }
 
-        if (!isOnline) {
-            // TODO
+    public boolean isUserRegistered(final String login, final String email) {
+        User user;
+        user = findUserByLogin(login);
+        if (user != null) {
+            return true;
         }
 
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                u.setPassword(encryptedPassword);
-            }
+        user = findUserByEmail(email);
+        return user != null;
+    }
+
+    public void updateUser(User user) {
+        String url = getDeleteUpdateUserUrl(user.getLogin());
+
+        mRestTemplate = new RestTemplate();
+        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(user), User.class);
+    }
+
+    private User findUserByEmail(String email) {
+        String url = getFindUserByEmailUrl(email);
+
+        mRestTemplate = new RestTemplate();
+        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        ResponseEntity<User> exchange = null;
+        try {
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(""), User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        HttpStatus statusCode = exchange.getStatusCode();
+
+        if (statusCode != HttpStatus.OK) {
+            return null;
+        } else {
+            return exchange.getBody();
         }
     }
 
-    public void updateUserEmail(Context context, String login, String email) {
-        // TODO - replace with shot to API
+    public User findUserByLogin(String login) {
+        String url = getFindUserByLoginUrl(login);
 
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            // TODO
-        }
-
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                u.setEmail(email);
-            }
-        }
-    }
-
-    public User findUserByLogin(Context context, String login) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
+        mRestTemplate = new RestTemplate();
+        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        ResponseEntity<User> exchange = null;
+        try {
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(""), User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                return u;
-            }
-        }
+        HttpStatus statusCode = exchange.getStatusCode();
 
-        return null;
+        if (statusCode != HttpStatus.OK) {
+            return null;
+        } else {
+            return exchange.getBody();
+        }
     }
 
-    public void deleteUser(Context context, String login) {
-        boolean isOnline = OnlineCheck.isOnline(context);
+    public void deleteUser(String login) {
+        String url = getDeleteUpdateUserUrl(login);
 
-        if (!isOnline) {
-            // TODO
-        }
-
-        for (User u : mockUsers) {
-            if (u.getLogin().equals(login)) {
-                mockUsers.remove(u);
-            }
-        }
-
-        throw new RuntimeException();
+        mRestTemplate = new RestTemplate();
+        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        mRestTemplate.exchange(url, HttpMethod.DELETE, new HttpEntity<>(""), User.class);
     }
 
-    private void addNewRequest(Context context, String url) {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//    private void addNewRequest(Context context, String url) {
+//        JsonObjectRequest request = new JsonObjectRequest
+//                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//
+//                        User user = getUserDtofromJson(response.toString());
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        // TODO: Handle error
+//
+//                    }
+//
+//                });
+//
+//        NetworkSingleton.getInstance(context).addToRequestQueue(request);
+//    }
 
-                    @Override
-                    public void onResponse(JSONObject r) {
-                        // TODO
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
-
-                    }
-                });
-
-        NetworkSingleton.getInstance(context).addToRequestQueue(jsonObjectRequest);
-    }
 }
