@@ -50,4 +50,8 @@
     <string name="shelf">Półka</string>
     <string name="edit">Edytuj</string>
     <string name="delete">Usuń</string>
+    <string name="room_name">Nazwa pokoju</string>
+    <string name="short_name_desc">Skrócona nazwa:</string>
+    <string name="colour_desc">Kolor:</string>
+    <string name="accept">Zatwierdź</string>
 </resources>

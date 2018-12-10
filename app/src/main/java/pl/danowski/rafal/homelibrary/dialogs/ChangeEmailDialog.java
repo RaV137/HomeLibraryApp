@@ -148,10 +148,10 @@ public class ChangeEmailDialog extends DialogFragment {
         @Override
         protected Void doInBackground(Void... voids) {
             Context context = getActivity().getBaseContext();
-            User user = userService.findUserByLogin(context, login); // TODO co z tym kontekstem?
+            User user = userService.findUserByLogin(context, login);
             String oldEmail = user.getEmail();
             sendEmailEmailChanged(context, oldEmail, email);
-            userService.updateUserEmail(context, login, email);
+            userService.updateUserEmail(context, login, email); // TODO: obsługa błędów
             return null;
         }
     }

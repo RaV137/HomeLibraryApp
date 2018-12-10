@@ -13,24 +13,24 @@ public class RoomService {
 
     private final RoomController controller = new RoomController();
 
-    public boolean createRoom(Context context, CreateRoom room) {
+    public Room createRoom(Context context, CreateRoom room) {
+        boolean isOnline = OnlineCheck.isOnline(context);
+
+        if (!isOnline) {
+            return null;
+        }
+
+        return controller.createRoom(room);
+    }
+
+    public boolean updateRoom(Context context, Room room) {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
             return false;
         }
 
-        return controller.createRoom(room);
-    }
-
-    public void updateRoom(Context context, Room room) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            // TODO
-        }
-
-        controller.updateRoom(room);
+        return controller.updateRoom(room);
     }
 
     public Room findRoomById(Context context, int id) {
@@ -53,13 +53,13 @@ public class RoomService {
         return controller.findRoomsByUserLogin(login);
     }
 
-    public void deleteRoom(Context context, int id) {
+    public boolean deleteRoom(Context context, int id) {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
-            // TODO
+            return false;
         }
 
-        controller.deleteRoom(id);
+        return controller.deleteRoom(id);
     }
 }

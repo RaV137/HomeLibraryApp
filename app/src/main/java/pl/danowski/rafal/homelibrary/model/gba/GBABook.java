@@ -21,5 +21,4 @@ public class GBABook {
     private String smallThumbnailURL;
     private String thumbnailURL;
     private String previewLinkURL;
-
 }

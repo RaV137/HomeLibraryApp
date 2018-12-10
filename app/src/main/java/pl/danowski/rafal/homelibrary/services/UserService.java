@@ -21,7 +21,7 @@ public class UserService {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
-            return false; // TODO
+            return false;
         }
 
         User user = findUserByLogin(context, login);
@@ -54,7 +54,7 @@ public class UserService {
         }
 
         CreateUser user = new CreateUser(login, email, encryptedPassword, false);
-        return controller.createUser(user) ? RegistrationResult.SUCCESS : RegistrationResult.CONNECTION_ERROR; // TODO: co w przypadku 'false'?
+        return controller.createUser(user) ? RegistrationResult.SUCCESS : RegistrationResult.CONNECTION_ERROR;
     }
 
     public boolean isUserRegistered(Context context, final String login, final String email) {
@@ -74,28 +74,28 @@ public class UserService {
         return user != null;
     }
 
-    public void updateUserPassword(Context context, String login, String encryptedPassword) {
+    public boolean updateUserPassword(Context context, String login, String encryptedPassword) {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
-            // TODO
+            return false;
         }
 
         User user = controller.findUserByLogin(login);
         user.setPassword(encryptedPassword);
-        controller.updateUser(user);
+        return controller.updateUser(user);
     }
 
-    public void updateUserEmail(Context context, String login, String email) {
+    public boolean updateUserEmail(Context context, String login, String email) {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
-            // TODO
+            return false;
         }
 
         User user = controller.findUserByLogin(login);
         user.setEmail(email);
-        controller.updateUser(user);
+        return controller.updateUser(user);
     }
 
     public User findUserByLogin(Context context, String login) {
@@ -118,14 +118,14 @@ public class UserService {
         return controller.findUserByEmail(email);
     }
 
-    public void deleteUser(Context context, String login) {
+    public boolean deleteUser(Context context, String login) {
         boolean isOnline = OnlineCheck.isOnline(context);
 
         if (!isOnline) {
-            // TODO
+            return false;
         }
 
-        controller.deleteUser(login);
+        return controller.deleteUser(login);
     }
 
 }

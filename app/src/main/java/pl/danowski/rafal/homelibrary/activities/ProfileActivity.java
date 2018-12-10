@@ -74,7 +74,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .setMessage("Czy na pewno chcesz usunąć konto? Tej decyzji nie można cofnąć.")
                 .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        DeleteAccountTask task = new DeleteAccountTask();
+                        DeleteAccountTask task = new DeleteAccountTask(); // TODO obsługa błędów internetu
                         task.execute((Void) null);
                         SharedPreferencesUtilities.deleteLogin(getApplicationContext());
                         SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);

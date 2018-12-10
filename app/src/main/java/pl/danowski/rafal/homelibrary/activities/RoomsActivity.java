@@ -2,6 +2,7 @@ package pl.danowski.rafal.homelibrary.activities;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,14 +18,19 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.adapters.RoomGridAdapter;
 import pl.danowski.rafal.homelibrary.model.room.Room;
 import pl.danowski.rafal.homelibrary.services.RoomService;
+import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 
 public class RoomsActivity extends AppCompatActivity {
 
+    @Getter
     private List<Room> rooms;
+
+    private GridView gridViewRooms;
     private final RoomService mService = new RoomService();
 
     @Override
@@ -32,10 +38,16 @@ public class RoomsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rooms);
 
+        rooms = new ArrayList<>();
+
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         assert actionBar != null : "ActionBar is null!";
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("Twoje pokoje");
+
+        String login = SharedPreferencesUtilities.getLogin(this);
+        GetUserRooms task = new GetUserRooms(login);
+        task.execute((Void) null);
 
         FloatingActionButton fab = findViewById(R.id.addRoom);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -45,19 +57,37 @@ public class RoomsActivity extends AppCompatActivity {
             }
         });
 
-        GridView gridViewRooms = findViewById(R.id.roomsGrid);
+        gridViewRooms = findViewById(R.id.roomsGrid);
         registerForContextMenu(gridViewRooms);
+    }
 
-        ArrayAdapter<Room> adapter = new RoomGridAdapter(this, (ArrayList<Room>) rooms);
-        adapter.notifyDataSetChanged();
-        gridViewRooms.invalidateViews();
-        gridViewRooms.setAdapter(adapter);
-        gridViewRooms.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    final int position, long id) {
-                displayBooksFromRoom(rooms.get(position));
-            }
-        });
+    private final class GetUserRooms extends AsyncTask<Void, Void, Void> {
+
+        private String login;
+
+        GetUserRooms(String login) {
+            this.login = login;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            rooms = mService.findRoomsByUserLogin(getBaseContext(), login);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            ArrayAdapter<Room> adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
+            adapter.notifyDataSetChanged();
+            gridViewRooms.invalidateViews();
+            gridViewRooms.setAdapter(adapter);
+            gridViewRooms.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        final int position, long id) {
+                    displayBooksFromRoom(rooms.get(position));
+                }
+            });
+        }
     }
 
     private void displayBooksFromRoom(Room room) {
@@ -97,7 +127,7 @@ public class RoomsActivity extends AppCompatActivity {
 
     private void deleteRoom(long id) {
         Room room = rooms.get((int) id);
-        mService.deleteRoom(this, room.getId());
+        mService.deleteRoom(this, room.getId()); // TODO async task
     }
 
     private void editRoom(long id) {

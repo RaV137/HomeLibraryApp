@@ -176,7 +176,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void updatePassword(final String login, final String password) {
         final String encryptedPassword = PasswordEncrypter.md5(password);
-        mUserService.updateUserPassword(this, login, encryptedPassword);
+        mUserService.updateUserPassword(this, login, encryptedPassword); // TODO: obsługa błędów
     }
 
     private void sendEmailWithNewCredentials(final String email, final String password) {

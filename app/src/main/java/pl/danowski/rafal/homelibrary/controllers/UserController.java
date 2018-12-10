@@ -13,32 +13,31 @@ import pl.danowski.rafal.homelibrary.model.user.User;
 @SuppressWarnings("ALL")
 public class UserController {
 
-    private RestTemplate mRestTemplate = new RestTemplate();
+    private RestTemplate mRestTemplate;
 
-    public boolean createUser(CreateUser user) {
-        mRestTemplate = new RestTemplate();
+    public UserController() {
+        this.mRestTemplate = new RestTemplate();
         mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-        ResponseEntity<User> exchange = mRestTemplate.exchange(Urls.getRegisterUserUrl(), HttpMethod.POST, new HttpEntity<>(user), User.class);
-        HttpStatus statusCode = exchange.getStatusCode();
-        return statusCode != HttpStatus.OK;
     }
 
-    public void updateUser(User user) {
-        String url = Urls.getDeleteUpdateUserUrl(user.getLogin());
+    public boolean createUser(CreateUser user) {
+        ResponseEntity<User> exchange = mRestTemplate.exchange(Urls.getRegisterUserUrl(), HttpMethod.POST, new HttpEntity<>(user), User.class);
+        HttpStatus statusCode = exchange.getStatusCode();
+        return statusCode.is2xxSuccessful();
+    }
 
-        mRestTemplate = new RestTemplate();
-        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-        mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(user), User.class);
+    public boolean updateUser(User user) {
+        String url = Urls.getDeleteUpdateUserUrl(user.getLogin());
+        ResponseEntity<User> exchange = mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(user), User.class);
+        HttpStatus statusCode = exchange.getStatusCode();
+        return statusCode.is2xxSuccessful();
     }
 
     public User findUserByEmail(String email) {
         String url = Urls.getFindUserByEmailUrl(email);
-
-        mRestTemplate = new RestTemplate();
-        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
         ResponseEntity<User> exchange;
         try {
-            exchange = mRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(""), User.class);
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, User.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -54,12 +53,9 @@ public class UserController {
 
     public User findUserByLogin(String login) {
         String url = Urls.getFindUserByLoginUrl(login);
-
-        mRestTemplate = new RestTemplate();
-        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
         ResponseEntity<User> exchange = null;
         try {
-            exchange = mRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(""), User.class);
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, User.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -74,11 +70,10 @@ public class UserController {
         }
     }
 
-    public void deleteUser(String login) {
+    public boolean deleteUser(String login) {
         String url = Urls.getDeleteUpdateUserUrl(login);
-
-        mRestTemplate = new RestTemplate();
-        mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-        mRestTemplate.exchange(url, HttpMethod.DELETE, new HttpEntity<>(""), User.class);
+        ResponseEntity<User> exchange = mRestTemplate.exchange(url, HttpMethod.DELETE, null, User.class);
+        HttpStatus statusCode = exchange.getStatusCode();
+        return statusCode.is2xxSuccessful();
     }
 }

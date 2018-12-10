@@ -144,7 +144,7 @@ public class ChangePasswordDialog extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            userService.updateUserPassword(getActivity().getBaseContext(), login, PasswordEncrypter.md5(newPassword));
+            userService.updateUserPassword(getActivity().getBaseContext(), login, PasswordEncrypter.md5(newPassword)); // TODO obsługa błędów
             return null;
         }
     }
