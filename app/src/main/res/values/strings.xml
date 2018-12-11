@@ -54,4 +54,5 @@
     <string name="short_name_desc">Skrócona nazwa:</string>
     <string name="colour_desc">Kolor:</string>
     <string name="accept">Zatwierdź</string>
+    <string name="no_rooms_info">Nie wprowadzono żadnego pokoju</string>
 </resources>

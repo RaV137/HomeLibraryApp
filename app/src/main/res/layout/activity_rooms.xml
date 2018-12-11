@@ -9,6 +9,7 @@
 
     <GridView
         android:id="@+id/roomsGrid"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
@@ -24,6 +25,19 @@
         android:verticalSpacing="@dimen/grid_layout_margin_spacing">
 
     </GridView>
+
+    <TextView
+        android:id="@+id/noRoomsInfo"
+        android:text="@string/no_rooms_info"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:layout_margin="20dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/addRoom"

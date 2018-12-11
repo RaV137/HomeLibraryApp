@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="@drawable/grid_item"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/singe_room_item_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@drawable/grid_item"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/roomName"
-        android:hint="roomName"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="5dp"
-        android:layout_weight="2"/>
+        android:hint="roomName"
+        android:padding="8dp"
+        android:paddingBottom="0dp"
+        android:textColor="@color/white"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/roomShortName"
-        android:hint="a"
-        android:padding="5dp"
-        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:hint="a"
+        android:padding="8dp"
+        android:paddingTop="0dp"
+        android:textColor="@color/white"
+        android:textSize="15sp" />
 
 </LinearLayout>

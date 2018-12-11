@@ -27,7 +27,7 @@ final class Urls {
 
     // ROOMS
     private static final String ROOMS_URL = "/rooms/";
-    private static final String FIND_ROOMS_BY_USER_URL = "login/";
+    private static final String FIND_ROOMS_BY_USER_URL = "user/";
 
     static String getCreateRoomUrl() {
         return BASE_URL + ROOMS_URL;

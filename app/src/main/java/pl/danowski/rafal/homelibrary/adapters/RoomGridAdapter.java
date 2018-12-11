@@ -1,6 +1,7 @@
 package pl.danowski.rafal.homelibrary.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,16 +32,11 @@ public class RoomGridAdapter extends ArrayAdapter<Room> {
         TextView mShortName = convertView.findViewById(R.id.roomShortName);
 
         assert room != null;
-        convertView.setBackgroundColor(parseColourFromString(room.getColour()));
+        convertView.setBackgroundColor(Color.parseColor(room.getColour()));
 
         mName.setText(room.getName());
         mShortName.setText(String.format("(%s)", room.getShortName()));
 
         return convertView;
     }
-
-    private int parseColourFromString(String colour) {
-        return 0;
-    }
-
 }

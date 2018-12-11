@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,14 @@ import pl.danowski.rafal.homelibrary.model.room.Room;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 
+// TODO: sortowanie, filtrowanie
+
 public class RoomsActivity extends AppCompatActivity {
 
     @Getter
     private List<Room> rooms;
 
+    private ArrayAdapter<Room> adapter;
     private GridView gridViewRooms;
     private final RoomService mService = new RoomService();
 
@@ -46,7 +49,7 @@ public class RoomsActivity extends AppCompatActivity {
         actionBar.setTitle("Twoje pokoje");
 
         String login = SharedPreferencesUtilities.getLogin(this);
-        GetUserRooms task = new GetUserRooms(login);
+        GetUserRoomsTask task = new GetUserRoomsTask(login);
         task.execute((Void) null);
 
         FloatingActionButton fab = findViewById(R.id.addRoom);
@@ -61,11 +64,11 @@ public class RoomsActivity extends AppCompatActivity {
         registerForContextMenu(gridViewRooms);
     }
 
-    private final class GetUserRooms extends AsyncTask<Void, Void, Void> {
+    private final class GetUserRoomsTask extends AsyncTask<Void, Void, Void> {
 
         private String login;
 
-        GetUserRooms(String login) {
+        GetUserRoomsTask(String login) {
             this.login = login;
         }
 
@@ -77,7 +80,13 @@ public class RoomsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            ArrayAdapter<Room> adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
+            if(rooms == null || rooms.size() == 0) {
+                TextView noRoomsInfo = findViewById(R.id.noRoomsInfo);
+                noRoomsInfo.setVisibility(View.VISIBLE);
+                gridViewRooms.setVisibility(View.GONE);
+                return;
+            }
+            adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
             adapter.notifyDataSetChanged();
             gridViewRooms.invalidateViews();
             gridViewRooms.setAdapter(adapter);
@@ -90,15 +99,47 @@ public class RoomsActivity extends AppCompatActivity {
         }
     }
 
+    private final class DeleteRoomTask extends AsyncTask<Void, Void, Void> {
+
+        private Integer id;
+
+        DeleteRoomTask(Integer id) {
+            this.id = id;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Room room = rooms.get(id);
+            boolean success = mService.deleteRoom(getBaseContext(), room.getId());
+            if(success) {
+                rooms.remove(room);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if(rooms == null || rooms.size() == 0) {
+                TextView noRoomsInfo = findViewById(R.id.noRoomsInfo);
+                noRoomsInfo.setVisibility(View.VISIBLE);
+                gridViewRooms.setVisibility(View.GONE);
+                return;
+            }
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     private void displayBooksFromRoom(Room room) {
         int id = room.getId();
         Intent intent = new Intent(this, BooksActivity.class);
-        intent.putExtra(AcitivitiesConstats.USER_ID, room.getUserId());
+        intent.putExtra(ActivitiesConstants.USER_ID, room.getUserId());
+        intent.putExtra(ActivitiesConstants.ROOM_ID, id);
         startActivity(intent);
     }
 
     private void addRoom() {
         Intent intent = new Intent(this, AddEditRoomActivity.class);
+        intent.putExtra(ActivitiesConstants.EDIT_ROOM, false);
         startActivity(intent);
     }
 
@@ -126,12 +167,17 @@ public class RoomsActivity extends AppCompatActivity {
     }
 
     private void deleteRoom(long id) {
-        Room room = rooms.get((int) id);
-        mService.deleteRoom(this, room.getId()); // TODO async task
+        DeleteRoomTask task = new DeleteRoomTask((int) id);
+        task.execute((Void) null);
     }
 
     private void editRoom(long id) {
         Room room = rooms.get((int) id);
+        int roomId = room.getId();
+        Intent intent = new Intent(this, AddEditRoomActivity.class);
+        intent.putExtra(ActivitiesConstants.ROOM_ID, roomId);
+        intent.putExtra(ActivitiesConstants.EDIT_ROOM, true);
+        startActivity(intent);
     }
 
     @Override

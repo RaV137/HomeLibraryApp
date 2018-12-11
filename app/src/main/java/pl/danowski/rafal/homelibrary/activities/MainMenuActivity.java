@@ -56,7 +56,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 premium();
             }
         });
-        Button settingsButton = findViewById(R.id.settings);
+        Button settingsButton = findViewById(R.id.search);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,7 +78,7 @@ public class MainMenuActivity extends AppCompatActivity {
     }
 
     private void myRooms() {
-        // TODO
+        startActivity(new Intent(this, RoomsActivity.class));
     }
 
     private void profile() {

@@ -11,31 +11,43 @@
         android:id="@+id/myBooks"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         android:layout_weight="1"
-        android:text="@string/my_books" />
+        android:background="@color/colorPrimary"
+        android:drawableStart="@drawable/study_96"
+        android:padding="16dp"
+        android:text="@string/my_books"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
 
     <Button
         android:id="@+id/myRooms"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         android:layout_weight="1"
-        android:text="@string/my_rooms" />
+        android:background="@color/colorPrimary"
+        android:drawableStart="@drawable/room_96"
+        android:padding="16dp"
+        android:text="@string/my_rooms"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/profileAndPremiumGroup"
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
@@ -45,9 +57,14 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
+            android:background="@color/colorPrimary"
             android:text="@string/profile"
+            android:padding="16dp"
+            android:drawableTop="@drawable/user_48"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             tools:ignore="ButtonStyle,NestedWeights" />
-
 
         <Button
             android:id="@+id/premium"
@@ -55,7 +72,13 @@
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
+            android:background="@color/colorPrimary"
             android:text="@string/premium"
+            android:padding="16dp"
+            android:drawableTop="@drawable/crown_48"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             tools:ignore="ButtonStyle" />
 
     </LinearLayout>
@@ -65,22 +88,27 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="32dp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/settings"
+            android:id="@+id/search"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
+            android:padding="16dp"
+            android:drawableTop="@drawable/search_48"
+            android:background="@color/colorPrimary"
             android:text="@string/search"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             tools:ignore="ButtonStyle,NestedWeights" />
-
 
         <Button
             android:id="@+id/logOut"
@@ -88,7 +116,13 @@
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
+            android:padding="16dp"
+            android:drawableTop="@drawable/export_48"
+            android:background="@color/colorPrimary"
             android:text="@string/log_out"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             tools:ignore="ButtonStyle" />
 
     </LinearLayout>
