@@ -12,7 +12,10 @@
         android:id="@+id/roomName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         android:hint="@string/room_name"
         android:inputType="text" />
 
@@ -20,7 +23,9 @@
         android:id="@+id/shortNameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         android:orientation="horizontal">
 
         <TextView
@@ -35,7 +40,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.2"
-            android:inputType="textShortMessage" />
+            android:gravity="center"
+            android:inputType="text"
+            android:maxLength="1" />
 
     </LinearLayout>
 
@@ -43,13 +50,16 @@
         android:id="@+id/colourPickerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="5"
             android:gravity="center_vertical|left"
             android:text="@string/colour_desc" />
 
@@ -57,7 +67,10 @@
             android:id="@+id/colorPicker"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1"
             android:background="@color/black" />
 
     </LinearLayout>
@@ -68,7 +81,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="48dp"
-        android:padding="16dp"
-        android:text="@string/accept" />
+        android:background="@color/colorPrimaryDark"
+        android:paddingStart="32dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="16dp"
+        android:text="@string/accept"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
 </LinearLayout>

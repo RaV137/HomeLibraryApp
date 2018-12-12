@@ -113,7 +113,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         return result;
     }
 
-    public class ForgotPasswordTask extends AsyncTask<Void, Void, Boolean> {
+    private class ForgotPasswordTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String email;
@@ -157,7 +157,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         Toast.makeText(this, "Udało się zresetować hasło użytkownika", Toast.LENGTH_SHORT).show();
     }
 
-    public class UpdatePasswordTask extends AsyncTask<Void, Void, Void> {
+    private class UpdatePasswordTask extends AsyncTask<Void, Void, Void> {
 
         private final String login;
         private final String password;

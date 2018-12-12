@@ -166,7 +166,7 @@ public class RegisterActivity extends AppCompatActivity {
         task.execute((Void) null);
     }
 
-    public class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String email;

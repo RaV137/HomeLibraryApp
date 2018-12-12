@@ -5,11 +5,11 @@ final class Urls {
     private static final String BASE_URL = "http://192.168.1.28:8080";
 
     // USERS
-    private static final String USERS_URL = "/users/";
-    private static final String FIND_USER_BY_EMAIL_URL = "email/";
-    private static final String FIND_USER_BY_LOGIN_URL = "login/";
+    private static final String USERS_URL = "/users";
+    private static final String FIND_USER_BY_EMAIL_URL = "/email/";
+    private static final String FIND_USER_BY_LOGIN_URL = "/login/";
 
-    static String getDeleteUpdateUserUrl(String login) {
+    static String getDeleteUserUrl(String login) {
         return BASE_URL + USERS_URL + login;
     }
 
@@ -21,20 +21,20 @@ final class Urls {
         return BASE_URL + USERS_URL + FIND_USER_BY_LOGIN_URL + login;
     }
 
-    static String getRegisterUserUrl() {
+    static String getRegisterUpdateUserUrl() {
         return BASE_URL + USERS_URL;
     }
 
     // ROOMS
-    private static final String ROOMS_URL = "/rooms/";
-    private static final String FIND_ROOMS_BY_USER_URL = "user/";
+    private static final String ROOMS_URL = "/rooms";
+    private static final String FIND_ROOMS_BY_USER_URL = "/user/";
 
-    static String getCreateRoomUrl() {
+    static String getCreateUpdateRoomUrl() {
         return BASE_URL + ROOMS_URL;
     }
 
-    static String getFindDeleteUpdateRoomById(int id) {
-        return BASE_URL + ROOMS_URL + id;
+    static String getFindDeleteRoomById(int id) {
+        return BASE_URL + ROOMS_URL + "/" + id;
     }
 
     static String getFindRoomsByUserLoginUrl(String login) {
@@ -42,11 +42,11 @@ final class Urls {
     }
 
     // BOOKS
-    private static String BOOKS_URL = "/books/";
+    private static String BOOKS_URL = "/books";
     private static String FIND_BOOKS_BY_QUERY_URL = "/query/";
     private static String FIND_BOOKS_BY_USER_URL = "/user/";
 
-    static String getCreateBookUrl() {
+    static String getCreateUpdateBookUrl() {
         return BASE_URL + BOOKS_URL;
     }
 
@@ -54,7 +54,7 @@ final class Urls {
         return BASE_URL + BOOKS_URL + id;
     }
 
-    static String getDeleteUpdateBookUrl(int id) {
+    static String getDeleteBookUrl(int id) {
         return BASE_URL + BOOKS_URL + id;
     }
 

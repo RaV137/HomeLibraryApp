@@ -48,6 +48,7 @@ dependencies {
     implementation 'org.springframework.android:spring-android-rest-template:2.0.0.M3'
     annotationProcessor 'org.projectlombok:lombok:1.18.2'
     implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+    implementation 'com.github.duanhong169:colorpicker:1.1.5'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation files('src/main/libs/activation.jar')
     implementation files('src/main/libs/additionnal.jar')

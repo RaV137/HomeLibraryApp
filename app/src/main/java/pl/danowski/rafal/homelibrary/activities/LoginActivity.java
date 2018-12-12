@@ -169,7 +169,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String mPassword;

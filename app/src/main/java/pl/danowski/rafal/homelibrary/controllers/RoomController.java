@@ -23,7 +23,7 @@ public class RoomController {
     }
 
     public Room createRoom(CreateRoom room) {
-        ResponseEntity<Room> exchange = mRestTemplate.exchange(Urls.getCreateRoomUrl(), HttpMethod.POST, new HttpEntity<>(room), Room.class);
+        ResponseEntity<Room> exchange = mRestTemplate.exchange(Urls.getCreateUpdateRoomUrl(), HttpMethod.POST, new HttpEntity<>(room), Room.class);
         HttpStatus statusCode = exchange.getStatusCode();
         if(!statusCode.is2xxSuccessful()) {
             return null;
@@ -32,14 +32,14 @@ public class RoomController {
     }
 
     public boolean updateRoom(Room room) {
-        String url = Urls.getFindDeleteUpdateRoomById(room.getId());
+        String url = Urls.getCreateUpdateRoomUrl();
         ResponseEntity<Room> exchange = mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(room), Room.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();
     }
 
     public Room findRoomById(int id) {
-        String url = Urls.getFindDeleteUpdateRoomById(id);
+        String url = Urls.getFindDeleteRoomById(id);
         ResponseEntity<Room> exchange;
         try {
             exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, Room.class);
@@ -75,7 +75,7 @@ public class RoomController {
     }
 
     public boolean deleteRoom(int id) {
-        String url = Urls.getFindDeleteUpdateRoomById(id);
+        String url = Urls.getFindDeleteRoomById(id);
         ResponseEntity<Room> exchange = mRestTemplate.exchange(url, HttpMethod.DELETE, null, Room.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();

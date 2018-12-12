@@ -21,13 +21,13 @@ public class UserController {
     }
 
     public boolean createUser(CreateUser user) {
-        ResponseEntity<User> exchange = mRestTemplate.exchange(Urls.getRegisterUserUrl(), HttpMethod.POST, new HttpEntity<>(user), User.class);
+        ResponseEntity<User> exchange = mRestTemplate.exchange(Urls.getRegisterUpdateUserUrl(), HttpMethod.POST, new HttpEntity<>(user), User.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();
     }
 
     public boolean updateUser(User user) {
-        String url = Urls.getDeleteUpdateUserUrl(user.getLogin());
+        String url = Urls.getRegisterUpdateUserUrl();
         ResponseEntity<User> exchange = mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(user), User.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();
@@ -71,7 +71,7 @@ public class UserController {
     }
 
     public boolean deleteUser(String login) {
-        String url = Urls.getDeleteUpdateUserUrl(login);
+        String url = Urls.getDeleteUserUrl(login);
         ResponseEntity<User> exchange = mRestTemplate.exchange(url, HttpMethod.DELETE, null, User.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();

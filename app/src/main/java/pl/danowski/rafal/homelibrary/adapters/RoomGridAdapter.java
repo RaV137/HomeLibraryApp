@@ -32,7 +32,8 @@ public class RoomGridAdapter extends ArrayAdapter<Room> {
         TextView mShortName = convertView.findViewById(R.id.roomShortName);
 
         assert room != null;
-        convertView.setBackgroundColor(Color.parseColor(room.getColour()));
+        View rectangle = convertView.findViewById(R.id.myRectangleView);
+        rectangle.setBackgroundColor(Color.parseColor(room.getColour()));
 
         mName.setText(room.getName());
         mShortName.setText(String.format("(%s)", room.getShortName()));

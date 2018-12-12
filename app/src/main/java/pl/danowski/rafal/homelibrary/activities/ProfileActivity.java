@@ -91,7 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-    public class DeleteAccountTask extends AsyncTask<Void, Void, Void> {
+    private class DeleteAccountTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -123,7 +123,7 @@ public class ProfileActivity extends AppCompatActivity {
         dialog.show(getFragmentManager(), "ChangePasswordDialog");
     }
 
-    public class ChangeEmailTask extends AsyncTask<Void, Void, Void> {
+    private class ChangeEmailTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -141,7 +141,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    public class UserCheckTask extends AsyncTask<Void, Void, Void> {
+    private class UserCheckTask extends AsyncTask<Void, Void, Void> {
 
         private String login;
 

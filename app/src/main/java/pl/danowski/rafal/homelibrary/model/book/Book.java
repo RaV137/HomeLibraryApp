@@ -15,4 +15,5 @@ public class Book {
     private Boolean read;
     private Integer userId;
     private Integer roomId;
+    // private String smallImageUrl
 }

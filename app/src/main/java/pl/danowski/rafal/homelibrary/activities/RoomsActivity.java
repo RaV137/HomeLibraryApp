@@ -1,5 +1,6 @@
 package pl.danowski.rafal.homelibrary.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -7,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,22 +18,19 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import lombok.Getter;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.adapters.RoomGridAdapter;
 import pl.danowski.rafal.homelibrary.model.room.Room;
 import pl.danowski.rafal.homelibrary.services.RoomService;
+import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
-
-// TODO: sortowanie, filtrowanie
 
 public class RoomsActivity extends AppCompatActivity {
 
-    @Getter
     private List<Room> rooms;
-
     private ArrayAdapter<Room> adapter;
     private GridView gridViewRooms;
     private final RoomService mService = new RoomService();
@@ -39,9 +38,15 @@ public class RoomsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         setContentView(R.layout.activity_rooms);
 
         rooms = new ArrayList<>();
+        adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         assert actionBar != null : "ActionBar is null!";
@@ -132,15 +137,46 @@ public class RoomsActivity extends AppCompatActivity {
     private void displayBooksFromRoom(Room room) {
         int id = room.getId();
         Intent intent = new Intent(this, BooksActivity.class);
-        intent.putExtra(ActivitiesConstants.USER_ID, room.getUserId());
-        intent.putExtra(ActivitiesConstants.ROOM_ID, id);
+        intent.putExtra(IntentExtras.USER_ID.getName(), room.getUserId());
+        intent.putExtra(IntentExtras.ROOM_ID.getName(), id);
         startActivity(intent);
     }
 
     private void addRoom() {
         Intent intent = new Intent(this, AddEditRoomActivity.class);
-        intent.putExtra(ActivitiesConstants.EDIT_ROOM, false);
+        intent.putExtra(IntentExtras.EDIT_ROOM.getName(), false);
         startActivity(intent);
+        adapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NewApi")
+    private void sort() {
+        rooms.sort(new Comparator<Room>() {
+            @Override
+            public int compare(Room r1, Room r2) {
+                return r1.getName().toLowerCase().compareTo(r2.getName().toLowerCase());
+            }
+        });
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main_view, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.sort:
+                sort();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -175,9 +211,10 @@ public class RoomsActivity extends AppCompatActivity {
         Room room = rooms.get((int) id);
         int roomId = room.getId();
         Intent intent = new Intent(this, AddEditRoomActivity.class);
-        intent.putExtra(ActivitiesConstants.ROOM_ID, roomId);
-        intent.putExtra(ActivitiesConstants.EDIT_ROOM, true);
+        intent.putExtra(IntentExtras.ROOM_ID.getName(), roomId);
+        intent.putExtra(IntentExtras.EDIT_ROOM.getName(), true);
         startActivity(intent);
+        adapter.notifyDataSetChanged();
     }
 
     @Override

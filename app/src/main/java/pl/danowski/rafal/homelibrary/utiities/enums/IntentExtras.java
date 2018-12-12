@@ -6,7 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum IntentExtras {
-    LOGIN("login");
+    LOGIN("login"),
+    USER_ID("userId"),
+    ROOM_ID("roomId"),
+    EDIT_ROOM("editRoom");
 
     private String name;
 }

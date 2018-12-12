@@ -74,7 +74,7 @@ public class MainMenuActivity extends AppCompatActivity {
     }
 
     private void myBooks() {
-        // TODO
+        startActivity(new Intent(this, BooksActivity.class));
     }
 
     private void myRooms() {

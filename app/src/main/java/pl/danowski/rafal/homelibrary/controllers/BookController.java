@@ -24,7 +24,7 @@ public class BookController {
     }
 
     public Book createBook(final CreateBook book) {
-        ResponseEntity<Book> exchange = mRestTemplate.exchange(Urls.getCreateBookUrl(), HttpMethod.POST, new HttpEntity<>(book), Book.class);
+        ResponseEntity<Book> exchange = mRestTemplate.exchange(Urls.getCreateUpdateBookUrl(), HttpMethod.POST, new HttpEntity<>(book), Book.class);
         HttpStatus statusCode = exchange.getStatusCode();
         if(!statusCode.is2xxSuccessful()) {
             return null;
@@ -33,14 +33,14 @@ public class BookController {
     }
 
     public boolean updateBook(final Book book) {
-        String url = Urls.getDeleteUpdateBookUrl(book.getId());
+        String url = Urls.getCreateUpdateBookUrl();
         ResponseEntity<Book> exchange = mRestTemplate.exchange(url, HttpMethod.PATCH, new HttpEntity<>(book), Book.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();
     }
 
     public boolean deleteBook(final int id) {
-        String url = Urls.getDeleteUpdateBookUrl(id);
+        String url = Urls.getDeleteBookUrl(id);
         ResponseEntity<Book> exchange = mRestTemplate.exchange(url, HttpMethod.DELETE, null, Book.class);
         HttpStatus statusCode = exchange.getStatusCode();
         return statusCode.is2xxSuccessful();
