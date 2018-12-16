@@ -1,4 +1,4 @@
-package pl.danowski.rafal.homelibrary.utiities;
+package pl.danowski.rafal.homelibrary.utiities.password;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

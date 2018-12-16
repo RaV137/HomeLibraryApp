@@ -3,9 +3,9 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,11 +18,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
-import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 /**
  * A login screen that offers login via login/password.
@@ -141,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             showProgress(true);
             final String encryptedPassword = PasswordEncrypter.md5(password);
-            mAuthTask = new UserLoginTask(login, encryptedPassword);
+            mAuthTask = new UserLoginTask(login, encryptedPassword, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -169,20 +171,27 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends BaseAsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String mPassword;
 
-        UserLoginTask(String login, String password) {
+        UserLoginTask(String login, String password, Context context) {
+            super(context);
             this.login = login;
             this.mPassword = password;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            LoginResult loginResult = mUserService.attemptLogin(getBaseContext(), login, mPassword);
-            return loginResult.equals(LoginResult.SUCCESS);
+            super.doInBackground(params);
+            boolean loginResult = false;
+            try {
+                loginResult = mUserService.attemptLogin(mContext, login, mPassword);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return loginResult;
         }
 
         @Override

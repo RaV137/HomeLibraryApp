@@ -4,12 +4,16 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
+
 public class OnlineCheck {
 
-    public static boolean isOnline(Context context) {
+    public static void isOnline(Context context) throws NoNetworkConnectionException {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr != null ? connMgr.getActiveNetworkInfo() : null;
-        return (networkInfo != null && networkInfo.isConnected());
+        if (networkInfo == null || !networkInfo.isConnected()) {
+            throw new NoNetworkConnectionException();
+        }
     }
 
 }

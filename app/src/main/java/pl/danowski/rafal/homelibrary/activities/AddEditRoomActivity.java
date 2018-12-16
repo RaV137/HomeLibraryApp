@@ -1,38 +1,35 @@
 package pl.danowski.rafal.homelibrary.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Color;
-import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
-import java.util.Objects;
-
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.Setter;
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.room.CreateRoom;
 import pl.danowski.rafal.homelibrary.model.room.Room;
 import pl.danowski.rafal.homelibrary.model.user.User;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
-import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
-import top.defaults.colorpicker.ColorPickerPopup;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class AddEditRoomActivity extends AppCompatActivity {
 
@@ -48,6 +45,9 @@ public class AddEditRoomActivity extends AppCompatActivity {
     @Setter(AccessLevel.PRIVATE)
     private int selectedColour;
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,12 +72,12 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
         if (edit) {
             Integer roomId = extras.getInt(IntentExtras.ROOM_ID.getName());
-            FindRoomByIdTask task = new FindRoomByIdTask(roomId, actionBar);
+            FindRoomByIdTask task = new FindRoomByIdTask(roomId, actionBar, this);
             task.execute((Void) null);
         } else {
             actionBar.setTitle("Stwórz pokój");
             String login = SharedPreferencesUtilities.getLogin(this);
-            FindUserByLoginTask task = new FindUserByLoginTask(login);
+            FindUserByLoginTask task = new FindUserByLoginTask(login, this);
             task.execute((Void) null);
         }
 
@@ -129,7 +129,6 @@ public class AddEditRoomActivity extends AppCompatActivity {
     }
 
     private void accept() {
-        // TODO: walidacja pól
         View focusView = null;
         boolean correct = true;
 
@@ -146,9 +145,8 @@ public class AddEditRoomActivity extends AppCompatActivity {
             correct = false;
         }
 
-
         if (correct) {
-            if(edit) {
+            if (edit) {
                 currRoom.setName(roomName);
                 currRoom.setShortName(shortName);
                 currRoom.setColour(getStringFromColorId(selectedColour));
@@ -167,28 +165,34 @@ public class AddEditRoomActivity extends AppCompatActivity {
     }
 
     private void createRoom(CreateRoom room) {
-        CreateRoomTask task = new CreateRoomTask(room);
+        CreateRoomTask task = new CreateRoomTask(room, this);
         task.execute((Void) null);
     }
 
     private void updateRoom() {
-        UpdateRoomTask task = new UpdateRoomTask();
+        UpdateRoomTask task = new UpdateRoomTask(this);
         task.execute((Void) null);
     }
 
-    private class FindRoomByIdTask extends AsyncTask<Void, Void, Void> {
+    private class FindRoomByIdTask extends BaseAsyncTask<Void, Void, Void> {
 
         private int id;
         private android.support.v7.app.ActionBar actionBar;
 
-        public FindRoomByIdTask(int id, android.support.v7.app.ActionBar actionBar) {
+        public FindRoomByIdTask(int id, ActionBar actionBar, Context context) {
+            super(context);
             this.id = id;
             this.actionBar = actionBar;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            currRoom = mService.findRoomById(getBaseContext(), id);
+            super.doInBackground(voids);
+            try {
+                currRoom = mService.findRoomById(mContext, id);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
 
@@ -207,17 +211,23 @@ public class AddEditRoomActivity extends AppCompatActivity {
         return String.format("#%06X", (0xFFFFFF & id));
     }
 
-    private class CreateRoomTask extends AsyncTask<Void, Void, Void> {
+    private class CreateRoomTask extends BaseAsyncTask<Void, Void, Void> {
 
         private CreateRoom room;
 
-        public CreateRoomTask(CreateRoom room) {
+        public CreateRoomTask(CreateRoom room, Context context) {
+            super(context);
             this.room = room;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mService.createRoom(getBaseContext(), this.room); // TODO obsługa błędów
+            super.doInBackground(voids);
+            try {
+                mService.createRoom(mContext, this.room); // TODO obsługa błędów
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
 
@@ -227,11 +237,20 @@ public class AddEditRoomActivity extends AppCompatActivity {
         }
     }
 
-    private class UpdateRoomTask extends AsyncTask<Void, Void, Void> {
+    private class UpdateRoomTask extends BaseAsyncTask<Void, Void, Void> {
+
+        private UpdateRoomTask(Context context) {
+           super(context);
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mService.updateRoom(getBaseContext(), currRoom);
+            super.doInBackground(voids);
+            try {
+                mService.updateRoom(mContext, currRoom);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
 
@@ -241,18 +260,26 @@ public class AddEditRoomActivity extends AppCompatActivity {
         }
     }
 
-    private class FindUserByLoginTask extends AsyncTask<Void, Void, Void> {
+    private class FindUserByLoginTask extends BaseAsyncTask<Void, Void, Void> {
 
         private String login;
         private int id;
 
-        public FindUserByLoginTask(String login) {
+        FindUserByLoginTask(String login, Context context) {
+            super(context);
             this.login = login;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            User user = mUserService.findUserByLogin(getBaseContext(), login);
+            super.doInBackground(voids);
+            User user;
+            try {
+                user = mUserService.findUserByLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                return null;
+            }
             this.id = user.getId();
             return null;
         }

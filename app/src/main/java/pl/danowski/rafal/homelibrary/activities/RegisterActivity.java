@@ -3,13 +3,12 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,12 +16,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.network.email.GMailSender;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
-import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -152,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             showProgress(true);
-            mAuthTask = new UserRegistrationTask(login, email, password);
+            mAuthTask = new UserRegistrationTask(login, email, password, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -166,16 +166,15 @@ public class RegisterActivity extends AppCompatActivity {
         task.execute((Void) null);
     }
 
-    private class UserRegistrationTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserRegistrationTask extends BaseAsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String email;
         private final String password;
         private final String encryptedPassword;
 
-        private RegistrationResult registrationResult;
-
-        UserRegistrationTask(String login, String email, String password) {
+        UserRegistrationTask(String login, String email, String password, Context context) {
+            super(context);
             this.login = login;
             this.email = email;
             this.password = password;
@@ -184,8 +183,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            registrationResult = mUserService.attemptRegistration(getBaseContext(), login, email, encryptedPassword);
-            return registrationResult.equals(RegistrationResult.SUCCESS);
+            boolean registrationResult = false;
+
+            try {
+                registrationResult = mUserService.attemptRegistration(mContext, login, email, encryptedPassword);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return registrationResult;
         }
 
         @Override
@@ -197,18 +202,6 @@ public class RegisterActivity extends AppCompatActivity {
                 sendAnEmailWithLoginCredentials(login, email, password);
                 showConfirmationToast();
                 finish();
-            } else {
-                switch (registrationResult) {
-                    case CONNECTION_ERROR:
-//                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
-                        break;
-                    case USER_ALREADY_EXISTS:
-                        mLoginView.setError(registrationResult.getText());
-                        mLoginView.requestFocus();
-                        break;
-                    default:
-//                        Toast.makeText(getBaseContext(), registrationResult.getText(), Toast.LENGTH_LONG).show();
-                }
             }
         }
 

@@ -15,4 +15,5 @@ public class CreateBook {
     private Boolean read;
     private Integer userId;
     private Integer roomId;
+    private String smallImageUrl;
 }

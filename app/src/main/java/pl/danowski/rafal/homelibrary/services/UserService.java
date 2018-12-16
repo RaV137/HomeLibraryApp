@@ -3,26 +3,21 @@ package pl.danowski.rafal.homelibrary.services;
 import android.content.Context;
 
 import pl.danowski.rafal.homelibrary.controllers.UserController;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.user.CreateUser;
 import pl.danowski.rafal.homelibrary.model.user.User;
 import pl.danowski.rafal.homelibrary.network.OnlineCheck;
-import pl.danowski.rafal.homelibrary.utiities.enums.LoginResult;
-import pl.danowski.rafal.homelibrary.utiities.enums.RegistrationResult;
 
 public class UserService {
 
     private final UserController controller = new UserController();
 
-    public boolean checkPasswordForLogin(Context context, final String login, final String password) {
+    public boolean checkPasswordForLogin(Context context, final String login, final String password) throws NoNetworkConnectionException {
         return confirmCredentials(context, login, password);
     }
 
-    private boolean confirmCredentials(Context context, final String login, final String password) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
+    private boolean confirmCredentials(Context context, final String login, final String password) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
 
         User user = findUserByLogin(context, login);
         if (user == null) {
@@ -32,37 +27,24 @@ public class UserService {
         return password.equals(user.getPassword());
     }
 
-    public LoginResult attemptLogin(Context context, final String login, final String password) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return LoginResult.CONNECTION_ERROR;
-        }
-
-        return confirmCredentials(context, login, password) ? LoginResult.SUCCESS : LoginResult.FAILURE;
+    public boolean attemptLogin(Context context, final String login, final String password) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
+        return confirmCredentials(context, login, password);
     }
 
-    public RegistrationResult attemptRegistration(Context context, final String login, final String email, final String encryptedPassword) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return RegistrationResult.CONNECTION_ERROR;
-        }
+    public boolean attemptRegistration(Context context, final String login, final String email, final String encryptedPassword) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
 
         if (isUserRegistered(context, login, email)) {
-            return RegistrationResult.USER_ALREADY_EXISTS;
+            return false;
         }
 
         CreateUser user = new CreateUser(login, email, encryptedPassword, false);
-        return controller.createUser(user) ? RegistrationResult.SUCCESS : RegistrationResult.CONNECTION_ERROR;
+        return controller.createUser(user);
     }
 
-    public boolean isUserRegistered(Context context, final String login, final String email) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
+    public boolean isUserRegistered(Context context, final String login, final String email) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
 
         User user;
         user = findUserByLogin(context, login);
@@ -74,57 +56,32 @@ public class UserService {
         return user != null;
     }
 
-    public boolean updateUserPassword(Context context, String login, String encryptedPassword) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
-
+    public boolean updateUserPassword(Context context, String login, String encryptedPassword) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         User user = controller.findUserByLogin(login);
         user.setPassword(encryptedPassword);
         return controller.updateUser(user);
     }
 
-    public boolean updateUserEmail(Context context, String login, String email) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
-
+    public boolean updateUserEmail(Context context, String login, String email) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         User user = controller.findUserByLogin(login);
         user.setEmail(email);
         return controller.updateUser(user);
     }
 
-    public User findUserByLogin(Context context, String login) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public User findUserByLogin(Context context, String login) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.findUserByLogin(login);
     }
 
-    public User findUserByEmail(Context context, String email) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public User findUserByEmail(Context context, String email) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.findUserByEmail(email);
     }
 
-    public boolean deleteUser(Context context, String login) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
-
+    public boolean deleteUser(Context context, String login) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.deleteUser(login);
     }
 

@@ -2,10 +2,10 @@ package pl.danowski.rafal.homelibrary.activities;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,10 +15,13 @@ import android.widget.TextView;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.dialogs.ChangeEmailDialog;
 import pl.danowski.rafal.homelibrary.dialogs.ChangePasswordDialog;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.user.User;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -42,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
         mUserService = new UserService();
         mEmailView = findViewById(R.id.email);
 
-        UserCheckTask task = new UserCheckTask(login);
+        UserCheckTask task = new UserCheckTask(login, this);
         task.execute((Void) null);
 
         Button mChangePasswordButton = findViewById(R.id.changePassword);
@@ -74,7 +77,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .setMessage("Czy na pewno chcesz usunąć konto? Tej decyzji nie można cofnąć.")
                 .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        DeleteAccountTask task = new DeleteAccountTask(); // TODO obsługa błędów internetu
+                        DeleteAccountTask task = new DeleteAccountTask(getBaseContext()); // TODO obsługa błędów internetu
                         task.execute((Void) null);
                         SharedPreferencesUtilities.deleteLogin(getApplicationContext());
                         SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);
@@ -91,15 +94,29 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-    private class DeleteAccountTask extends AsyncTask<Void, Void, Void> {
+    private class DeleteAccountTask extends BaseAsyncTask<Void, Void, Void> {
+
+        private DeleteAccountTask(Context context) {
+            super(context);
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
             String login = SharedPreferencesUtilities.getLogin(getApplicationContext());
-            User user = mUserService.findUserByLogin(getBaseContext(), login);
+            User user = null;
+            try {
+                user = mUserService.findUserByLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                return null;
+            }
             String email = user.getEmail();
             sendEmailAccountDeleted(email);
-            mUserService.deleteUser(getBaseContext(), login);
+            try {
+                mUserService.deleteUser(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
     }
@@ -114,22 +131,28 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void changeEmail() {
-        ChangeEmailTask task = new ChangeEmailTask();
+        ChangeEmailTask task = new ChangeEmailTask(this);
         task.execute((Void) null);
     }
 
     private void changePassword() {
         DialogFragment dialog = new ChangePasswordDialog();
+        ((ChangePasswordDialog) dialog).setMContext(this);
         dialog.show(getFragmentManager(), "ChangePasswordDialog");
     }
 
-    private class ChangeEmailTask extends AsyncTask<Void, Void, Void> {
+    private class ChangeEmailTask extends BaseAsyncTask<Void, Void, Void> {
+
+        ChangeEmailTask(Context context) {
+            super(context);
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
             ChangeEmailDialog dialog = new ChangeEmailDialog();
-            dialog.setDialogResult(new ChangeEmailDialog.OnMyDialogResult(){
-                public void finish(boolean success, String email){
+            dialog.setMContext(mContext);
+            dialog.setDialogResult(new ChangeEmailDialog.OnMyDialogResult() {
+                public void finish(boolean success, String email) {
                     if (success) {
                         mEmailView.setText(email);
                     }
@@ -141,17 +164,25 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private class UserCheckTask extends AsyncTask<Void, Void, Void> {
+    private class UserCheckTask extends BaseAsyncTask<Void, Void, Void> {
 
         private String login;
 
-        public UserCheckTask(String login) {
+        public UserCheckTask(String login, Context mContext) {
+            super(mContext);
             this.login = login;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            User user = mUserService.findUserByLogin(getBaseContext(), login);
+            super.doInBackground(params);
+            User user = null;
+            try {
+                user = mUserService.findUserByLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                return null;
+            }
             assert user != null : ("Brak użytkownika o danym loginie: " + login);
             mEmailView.setText(user.getEmail());
             return null;

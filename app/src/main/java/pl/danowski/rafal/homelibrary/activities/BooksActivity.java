@@ -1,9 +1,8 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.annotation.SuppressLint;
-import android.app.DialogFragment;
+import android.content.Context;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -21,21 +20,21 @@ import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.adapters.BookGridAdapter;
-import pl.danowski.rafal.homelibrary.adapters.RoomGridAdapter;
-import pl.danowski.rafal.homelibrary.dialogs.ChangeEmailDialog;
 import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
-import pl.danowski.rafal.homelibrary.model.room.Room;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.BookService;
 import pl.danowski.rafal.homelibrary.utiities.enums.SortOptionEnum;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class BooksActivity extends AppCompatActivity {
 
     private List<Book> books;
     private ArrayAdapter<Book> adapter;
     private GridView gridViewBooks;
-    private final BookService mService= new BookService();
+    private final BookService mService = new BookService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +56,7 @@ public class BooksActivity extends AppCompatActivity {
         actionBar.setTitle(R.string.all_books_activity_title);
 
         String login = SharedPreferencesUtilities.getLogin(this);
-        GetUserBooksTask task = new GetUserBooksTask(login);
+        GetUserBooksTask task = new GetUserBooksTask(login, this);
         task.execute((Void) null);
 
         FloatingActionButton fab = findViewById(R.id.addBook);
@@ -69,29 +68,34 @@ public class BooksActivity extends AppCompatActivity {
         });
     }
 
-    private final class GetUserBooksTask extends AsyncTask<Void, Void, Void> {
+    private final class GetUserBooksTask extends BaseAsyncTask<Void, Void, Void> {
 
         private String login;
 
-        GetUserBooksTask(String login) {
+        GetUserBooksTask(String login, Context context) {
+            super(context);
             this.login = login;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            books = mService.findBooksByUserLogin(getBaseContext(), login);
+            try {
+                books = mService.findBooksByUserLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(books == null || books.size() == 0) {
+            if (books == null || books.size() == 0) {
                 TextView noRoomsInfo = findViewById(R.id.noBooksInfo);
                 noRoomsInfo.setVisibility(View.VISIBLE);
                 gridViewBooks.setVisibility(View.GONE);
                 return;
             }
-            adapter = new BookGridAdapter(getBaseContext(), (ArrayList<Book>) books);
+            adapter = new BookGridAdapter(mContext, (ArrayList<Book>) books);
             adapter.notifyDataSetChanged();
             gridViewBooks.invalidateViews();
             gridViewBooks.setAdapter(adapter);
@@ -133,7 +137,7 @@ public class BooksActivity extends AppCompatActivity {
 
     private void sort() {
         SortBooksDialog dialog = new SortBooksDialog();
-        dialog.setDialogResult(new SortBooksDialog.OnMyDialogResult(){
+        dialog.setDialogResult(new SortBooksDialog.OnMyDialogResult() {
             @Override
             public void finish(SortOptionEnum sortOptionEnum) {
                 switch (sortOptionEnum) {
@@ -166,8 +170,17 @@ public class BooksActivity extends AppCompatActivity {
         books.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
-                // TODO rating == null
-                return b1.getRating() - b2.getRating();
+                Integer r1 = b1.getRating();
+                Integer r2 = b2.getRating();
+                if (r1 == null) {
+                    if (r2 == null) {
+                        return 0;
+                    }
+                    return -1;
+                } else if (r2 == null) {
+                    return 1;
+                }
+                return r1 - r2;
             }
         });
         adapter.notifyDataSetChanged();
@@ -178,8 +191,17 @@ public class BooksActivity extends AppCompatActivity {
         books.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
-                // TODO rating == null
-                return b2.getRating() - b1.getRating();
+                Integer r1 = b1.getRating();
+                Integer r2 = b2.getRating();
+                if (r1 == null) {
+                    if (r2 == null) {
+                        return 0;
+                    }
+                    return 1;
+                } else if (r2 == null) {
+                    return -1;
+                }
+                return r2 - r1;
             }
         });
         adapter.notifyDataSetChanged();

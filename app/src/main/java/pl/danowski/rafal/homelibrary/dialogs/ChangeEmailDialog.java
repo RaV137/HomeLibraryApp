@@ -15,12 +15,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import lombok.Setter;
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.user.User;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class ChangeEmailDialog extends DialogFragment {
@@ -30,6 +33,9 @@ public class ChangeEmailDialog extends DialogFragment {
     private EditText mPassword;
     private View focusView = null;
     private UserService userService = new UserService();
+
+    @Setter
+    private Context mContext;
 
     @SuppressLint("InflateParams")
     @Override
@@ -98,14 +104,20 @@ public class ChangeEmailDialog extends DialogFragment {
                 focusView = mPassword;
                 mPassword.setError("Pole wymagane");
                 exit = false;
-            } else if (!userService.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(password))) {
-                focusView = mPassword;
-                mPassword.setError("Niepoprawne hasło");
-                exit = false;
-            } else if (!Validator.isValidEmailFormat(email)) {
-                focusView = mEmail;
-                mEmail.setError(getString(R.string.rule_email));
-                exit = false;
+            } else {
+                try {
+                    if (!userService.checkPasswordForLogin(mContext, login, PasswordEncrypter.md5(password))) {
+                        focusView = mPassword;
+                        mPassword.setError("Niepoprawne hasło");
+                        exit = false;
+                    } else if (!Validator.isValidEmailFormat(email)) {
+                        focusView = mEmail;
+                        mEmail.setError(getString(R.string.rule_email));
+                        exit = false;
+                    }
+                } catch (NoNetworkConnectionException e) {
+                    NoNetworkConnectionToast.show(mContext);
+                }
             }
             return exit;
         }
@@ -115,7 +127,7 @@ public class ChangeEmailDialog extends DialogFragment {
             if (exit) {
                 UpdateEmailTask task = new UpdateEmailTask(login, email);
                 task.execute((Void) null);
-                Toast.makeText(getActivity().getBaseContext(), "Udało się zmienić adres email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Udało się zmienić adres email", Toast.LENGTH_SHORT).show();
                 if (mDialogResult != null) {
                     mDialogResult.finish(true, email);
                 }
@@ -147,11 +159,20 @@ public class ChangeEmailDialog extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Context context = getActivity().getBaseContext();
-            User user = userService.findUserByLogin(context, login);
+            User user;
+            try {
+                user = userService.findUserByLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                return null;
+            }
             String oldEmail = user.getEmail();
-            sendEmailEmailChanged(context, oldEmail, email);
-            userService.updateUserEmail(context, login, email); // TODO: obsługa błędów
+            sendEmailEmailChanged(mContext, oldEmail, email);
+            try {
+                userService.updateUserEmail(mContext, login, email); // TODO: obsługa błędów
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
     }

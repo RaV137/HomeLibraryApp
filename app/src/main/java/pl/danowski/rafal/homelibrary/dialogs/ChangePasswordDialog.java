@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,10 +15,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import lombok.Setter;
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class ChangePasswordDialog extends DialogFragment {
@@ -27,6 +31,9 @@ public class ChangePasswordDialog extends DialogFragment {
     private View focusView = null;
     private UserService userService = new UserService();
     private EditText mConfirmNewPassword;
+
+    @Setter
+    private Context mContext;
 
     @SuppressLint("InflateParams")
     @Override
@@ -103,18 +110,24 @@ public class ChangePasswordDialog extends DialogFragment {
                 focusView = mConfirmNewPassword;
                 mConfirmNewPassword.setError("Pole wymagane");
                 exit = false;
-            } else if (!userService.checkPasswordForLogin(getActivity().getBaseContext(), login, PasswordEncrypter.md5(oldPassword))) {
-                focusView = mOldPassword;
-                mOldPassword.setError("Niepoprawne hasło");
-                exit = false;
-            } else if (!Validator.isValidPasswordFormat(newPassword)) {
-                focusView = mNewPassword;
-                mNewPassword.setError(getString(R.string.rule_password));
-                exit = false;
-            } else if (!newPassword.equals(confirmNewPassword)) {
-                focusView = mConfirmNewPassword;
-                mConfirmNewPassword.setError("Oba hasła muszą być takie same");
-                exit = false;
+            } else {
+                try {
+                    if (!userService.checkPasswordForLogin(mContext, login, PasswordEncrypter.md5(oldPassword))) {
+                        focusView = mOldPassword;
+                        mOldPassword.setError("Niepoprawne hasło");
+                        exit = false;
+                    } else if (!Validator.isValidPasswordFormat(newPassword)) {
+                        focusView = mNewPassword;
+                        mNewPassword.setError(getString(R.string.rule_password));
+                        exit = false;
+                    } else if (!newPassword.equals(confirmNewPassword)) {
+                        focusView = mConfirmNewPassword;
+                        mConfirmNewPassword.setError("Oba hasła muszą być takie same");
+                        exit = false;
+                    }
+                } catch (NoNetworkConnectionException e) {
+                    NoNetworkConnectionToast.show(mContext);
+                }
             }
             return exit;
         }
@@ -124,7 +137,7 @@ public class ChangePasswordDialog extends DialogFragment {
             if (exit) {
                 UpdatePasswordTask task = new UpdatePasswordTask(login, newPassword);
                 task.execute((Void) null);
-                Toast.makeText(getActivity().getBaseContext(), "Udało się zmienić hasło", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Udało się zmienić hasło", Toast.LENGTH_SHORT).show();
                 d.dismiss();
             } else {
                 focusView.requestFocus();
@@ -144,7 +157,11 @@ public class ChangePasswordDialog extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            userService.updateUserPassword(getActivity().getBaseContext(), login, PasswordEncrypter.md5(newPassword)); // TODO obsługa błędów
+            try {
+                userService.updateUserPassword(mContext, login, PasswordEncrypter.md5(newPassword)); // TODO obsługa błędów
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
     }

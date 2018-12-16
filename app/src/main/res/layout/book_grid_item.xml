@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/grid_item"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/grid_item">
 
     <ImageView
         android:id="@+id/bookCover"
         android:layout_width="@dimen/grid_item_book_image_width"
         android:layout_height="@dimen/grid_item_book_image_height"
         android:layout_margin="@dimen/grid_item_default_margin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/rating"
         app:layout_constraintBottom_toTopOf="@id/title"
-        app:srcCompat="@drawable/ic_library_books_black_24dp" />
+        app:layout_constraintEnd_toStartOf="@id/rating"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/favouriteStar"
@@ -26,42 +23,43 @@
         android:layout_marginTop="@dimen/grid_item_default_margin"
         android:layout_marginEnd="@dimen/grid_item_default_margin"
         android:layout_marginBottom="@dimen/grid_item_default_margin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/bookCover"
         app:layout_constraintBottom_toTopOf="@+id/rating"
-        app:srcCompat="@drawable/ic_star_border_black_24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bookCover"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/rating"
-        android:layout_width="25dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="@dimen/grid_item_default_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/grid_item_default_margin"
-        android:text="8"
         android:gravity="center"
-        android:textSize="15sp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:singleLine="true"
+        android:text="8"
         android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@id/roomAndShelf"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/bookCover"
-        app:layout_constraintTop_toBottomOf="@id/favouriteStar"
-        app:layout_constraintBottom_toTopOf="@id/roomAndShelf"/>
+        app:layout_constraintTop_toBottomOf="@id/favouriteStar" />
 
     <TextView
         android:id="@+id/roomAndShelf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:paddingStart="2dp"
         android:paddingEnd="2dp"
         android:paddingBottom="@dimen/grid_item_default_margin"
-        android:text="S/1"
         android:singleLine="true"
-        android:gravity="center"
+        android:text="S/1"
         android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rating"
         app:layout_constraintStart_toEndOf="@id/bookCover"
-        app:layout_constraintBottom_toTopOf="@id/title"/>
+        app:layout_constraintTop_toBottomOf="@id/rating" />
 
     <TextView
         android:id="@+id/title"
@@ -70,20 +68,20 @@
         android:layout_marginStart="@dimen/grid_item_default_margin"
         android:layout_marginEnd="@dimen/grid_item_default_margin"
         android:layout_marginBottom="@dimen/grid_item_default_margin"
-        android:text="Alicja w krainie czarów"
         android:singleLine="true"
+        android:text="Alicja w krainie czarów"
         android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/author"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/author"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/author"
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:layout_margin="@dimen/grid_item_default_margin"
-        android:text="Jakiś koleś, chyba"
         android:singleLine="true"
+        android:text="Jakiś koleś, chyba"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

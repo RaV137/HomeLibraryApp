@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import pl.danowski.rafal.homelibrary.controllers.BookController;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
 import pl.danowski.rafal.homelibrary.model.book.CreateBook;
 import pl.danowski.rafal.homelibrary.model.gba.GBABook;
@@ -20,63 +21,33 @@ public class BookService {
 
     private final BookController controller = new BookController();
 
-    public Book createBook(Context context, final CreateBook book) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public Book createBook(Context context, final CreateBook book) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.createBook(book);
     }
 
-    public boolean updateBook(Context context, final Book book) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
-
+    public boolean updateBook(Context context, final Book book) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.updateBook(book);
     }
 
-    public boolean deleteBook(Context context, final int id) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return false;
-        }
-
+    public boolean deleteBook(Context context, final int id) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.deleteBook(id);
     }
 
-    public GBABook findGBABookById(Context context, final String id) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public GBABook findGBABookById(Context context, final String id) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.findGBABookById(id);
     }
 
-    public List<GBABook> findGBABooksByQuery(Context context, final String query) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public List<GBABook> findGBABooksByQuery(Context context, final String query) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.findGBABooksByQuery(query);
     }
 
-    public List<Book> findBooksByUserLogin(Context context, final String login) {
-        boolean isOnline = OnlineCheck.isOnline(context);
-
-        if (!isOnline) {
-            return null;
-        }
-
+    public List<Book> findBooksByUserLogin(Context context, final String login) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
         return controller.findBooksByUserLogin(login);
     }
 

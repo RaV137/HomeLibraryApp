@@ -1,6 +1,8 @@
 package pl.danowski.rafal.homelibrary.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -10,13 +12,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
 import pl.danowski.rafal.homelibrary.model.room.Room;
+import pl.danowski.rafal.homelibrary.network.ImageDownloader;
 import pl.danowski.rafal.homelibrary.services.RoomService;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class BookGridAdapter extends ArrayAdapter<Book> {
 
@@ -30,6 +36,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
     private Book book;
     private Context mContext;
     private TextView mRoomAndShelf;
+    private ImageView mCover;
 
     @NonNull
     @Override
@@ -45,21 +52,21 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
         TextView mRating = convertView.findViewById(R.id.rating);
         mRoomAndShelf = convertView.findViewById(R.id.roomAndShelf);
         ImageView mFavourite = convertView.findViewById(R.id.favouriteStar);
-        ImageView mCover = convertView.findViewById(R.id.bookCover);
+        mCover = convertView.findViewById(R.id.bookCover);
 
         assert book != null : "Book is null!";
         mTitle.setText(book.getTitle());
         mAuthor.setText(book.getAuthor());
 
         Integer rating = book.getRating();
-        if(rating == null) {
+        if (rating == null) {
             mRating.setText("N/A");
         } else {
             mRating.setText(String.valueOf(rating));
         }
 
         Boolean favourite = book.getFavourite();
-        if(favourite) {
+        if (favourite) {
             mFavourite.setImageResource(R.drawable.ic_star_black_24dp);
         } else {
             mFavourite.setImageResource(R.drawable.ic_star_border_black_24dp);
@@ -73,37 +80,53 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
             }
         });
 
-        // TODO obrazek z GPA wrzucić do bazy i pobierać z niej przy wyświetlaniu listy książek
-//        String imageUrl = book.getSmallImageUrl();
-
+        String imageUrl = book.getSmallImageUrl();
         Integer roomId = book.getRoomId();
-        FindRoomByIdAndFindImageFromUrlTask task = new FindRoomByIdAndFindImageFromUrlTask(roomId, null);
+        FindRoomByIdAndFindImageFromUrlTask task = new FindRoomByIdAndFindImageFromUrlTask(roomId, imageUrl);
         task.execute((Void) null);
 
         return convertView;
     }
 
-    // TODO: dla każdej książki osobny wątek, co może pójść nie tak...
     private class FindRoomByIdAndFindImageFromUrlTask extends AsyncTask<Void, Void, Void> {
 
         private int roomId;
         private String url;
         private Room room;
+        private ImageView currCover;
+        private Bitmap bmp;
 
         FindRoomByIdAndFindImageFromUrlTask(int roomId, String url) {
             this.roomId = roomId;
             this.url = url;
+            currCover = mCover;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             RoomService service = new RoomService();
-            room = service.findRoomById(mContext, roomId);
+            try {
+                room = service.findRoomById(mContext, roomId);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                return null;
+            }
+            if(url != null) {
+                bmp = ImageDownloader.bitmapFromUrl(url);
+            } else {
+                bmp = null;
+            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            if (url != null) {
+                currCover.setImageBitmap(bmp);
+            } else {
+                currCover.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_library_books_black_24dp));
+            }
             Integer shelf = book.getShelfNumber();
             String roomAndShelf = room.getShortName() + "/" + shelf;
             mRoomAndShelf.setText(roomAndShelf);

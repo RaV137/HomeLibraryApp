@@ -3,13 +3,13 @@ package pl.danowski.rafal.homelibrary.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,12 +19,14 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import pl.danowski.rafal.homelibrary.R;
-import pl.danowski.rafal.homelibrary.network.email.GMailSender;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
-import pl.danowski.rafal.homelibrary.utiities.PasswordEncrypter;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.PasswordGenerator;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
@@ -97,7 +99,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             showProgress(true);
-            mAuthTask = new ForgotPasswordTask(login, email);
+            mAuthTask = new ForgotPasswordTask(login, email, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -113,19 +115,25 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         return result;
     }
 
-    private class ForgotPasswordTask extends AsyncTask<Void, Void, Boolean> {
+    private class ForgotPasswordTask extends BaseAsyncTask<Void, Void, Boolean> {
 
         private final String login;
         private final String email;
 
-        ForgotPasswordTask(String login, String email) {
+        ForgotPasswordTask(String login, String email, Context context) {
+            super(context);
             this.login = login;
             this.email = email;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return mUserService.isUserRegistered(getBaseContext(), login, email);
+            try {
+                return mUserService.isUserRegistered(mContext, login, email);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return false;
         }
 
         @Override
@@ -162,7 +170,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         private final String login;
         private final String password;
 
-        public UpdatePasswordTask(String login, String password) {
+        UpdatePasswordTask(String login, String password) {
             this.login = login;
             this.password = password;
         }
@@ -176,7 +184,11 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void updatePassword(final String login, final String password) {
         final String encryptedPassword = PasswordEncrypter.md5(password);
-        mUserService.updateUserPassword(this, login, encryptedPassword); // TODO: obsługa błędów
+        try {
+            mUserService.updateUserPassword(this, login, encryptedPassword); // TODO: obsługa błędów
+        } catch (NoNetworkConnectionException e) {
+            NoNetworkConnectionToast.show(this);
+        }
     }
 
     private void sendEmailWithNewCredentials(final String email, final String password) {

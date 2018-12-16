@@ -1,12 +1,13 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,10 +24,13 @@ import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.adapters.RoomGridAdapter;
+import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.room.Room;
+import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
+import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class RoomsActivity extends AppCompatActivity {
 
@@ -46,7 +50,7 @@ public class RoomsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rooms);
 
         rooms = new ArrayList<>();
-        adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
+        adapter = new RoomGridAdapter(this, (ArrayList<Room>) rooms);
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         assert actionBar != null : "ActionBar is null!";
@@ -54,7 +58,7 @@ public class RoomsActivity extends AppCompatActivity {
         actionBar.setTitle("Twoje pokoje");
 
         String login = SharedPreferencesUtilities.getLogin(this);
-        GetUserRoomsTask task = new GetUserRoomsTask(login);
+        GetUserRoomsTask task = new GetUserRoomsTask(login, this);
         task.execute((Void) null);
 
         FloatingActionButton fab = findViewById(R.id.addRoom);
@@ -69,17 +73,23 @@ public class RoomsActivity extends AppCompatActivity {
         registerForContextMenu(gridViewRooms);
     }
 
-    private final class GetUserRoomsTask extends AsyncTask<Void, Void, Void> {
+    private final class GetUserRoomsTask extends BaseAsyncTask<Void, Void, Void> {
 
         private String login;
 
-        GetUserRoomsTask(String login) {
+        GetUserRoomsTask(String login, Context context) {
+            super(context);
             this.login = login;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            rooms = mService.findRoomsByUserLogin(getBaseContext(), login);
+            super.doInBackground(voids);
+            try {
+                rooms = mService.findRoomsByUserLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             return null;
         }
 
@@ -91,7 +101,7 @@ public class RoomsActivity extends AppCompatActivity {
                 gridViewRooms.setVisibility(View.GONE);
                 return;
             }
-            adapter = new RoomGridAdapter(getBaseContext(), (ArrayList<Room>) rooms);
+            adapter = new RoomGridAdapter(mContext, (ArrayList<Room>) rooms);
             adapter.notifyDataSetChanged();
             gridViewRooms.invalidateViews();
             gridViewRooms.setAdapter(adapter);
@@ -107,15 +117,22 @@ public class RoomsActivity extends AppCompatActivity {
     private final class DeleteRoomTask extends AsyncTask<Void, Void, Void> {
 
         private Integer id;
+        private Context mContext;
 
-        DeleteRoomTask(Integer id) {
+        DeleteRoomTask(Integer id, Context context) {
             this.id = id;
+            mContext = context;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             Room room = rooms.get(id);
-            boolean success = mService.deleteRoom(getBaseContext(), room.getId());
+            boolean success = false;
+            try {
+                success = mService.deleteRoom(mContext, room.getId());
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
             if(success) {
                 rooms.remove(room);
             }
@@ -203,7 +220,7 @@ public class RoomsActivity extends AppCompatActivity {
     }
 
     private void deleteRoom(long id) {
-        DeleteRoomTask task = new DeleteRoomTask((int) id);
+        DeleteRoomTask task = new DeleteRoomTask((int) id, this);
         task.execute((Void) null);
     }
 
