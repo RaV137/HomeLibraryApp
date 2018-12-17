@@ -296,8 +296,8 @@ public class EditBookActivity extends AppCompatActivity {
         mBook.setRoomId(currRoom.getId());
 
         UpdateBookTask task = new UpdateBookTask(this);
-        task.execute(); // brak dodania do kolejki, bo ten task musi się wykonać, nie można go ubić
-        finish();
+        task.execute();
+        tasks.add(task);
     }
 
     private void favouriteClicked() {
@@ -407,6 +407,11 @@ public class EditBookActivity extends AppCompatActivity {
                 NoNetworkConnectionToast.show(mContext);
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            finish();
         }
     }
 

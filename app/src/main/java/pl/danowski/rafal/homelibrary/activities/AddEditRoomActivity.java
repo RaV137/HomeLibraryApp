@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -65,6 +67,25 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_single_item, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.delete:
+                deleteRoom();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -194,6 +215,35 @@ public class AddEditRoomActivity extends AppCompatActivity {
         UpdateRoomTask task = new UpdateRoomTask(this);
         task.execute((Void) null);
         tasks.add(task);
+    }
+
+    private void deleteRoom() {
+        DeleteRoomTask task = new DeleteRoomTask(this);
+        task.execute((Void) null);
+        tasks.add(task);
+    }
+
+    private class DeleteRoomTask extends BaseAsyncTask<Void, Void, Void> {
+
+        private DeleteRoomTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            super.doInBackground(voids);
+            try {
+                mService.deleteRoom(mContext, currRoom.getId());
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            finish();
+        }
     }
 
     private final class FindRoomByIdTask extends BaseAsyncTask<Void, Void, Void> {

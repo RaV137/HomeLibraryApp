@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pl.danowski.rafal.homelibrary.activities.BooksActivity" >
 
-    <item android:id="@+id/sort"
-        android:title="@string/menu_sort"
+    <item android:id="@+id/delete"
+        android:title="@string/delete"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
