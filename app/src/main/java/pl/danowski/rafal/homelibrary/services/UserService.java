@@ -10,7 +10,19 @@ import pl.danowski.rafal.homelibrary.network.OnlineCheck;
 
 public class UserService {
 
-    private final UserController controller = new UserController();
+    private final UserController controller;
+
+    private UserService() {
+        this.controller = UserController.getInstance();
+    }
+
+    private static final class UserServiceHelper {
+        private static final UserService INSTANCE = new UserService();
+    }
+
+    public static UserService getInstance() {
+        return UserServiceHelper.INSTANCE;
+    }
 
     public boolean checkPasswordForLogin(Context context, final String login, final String password) throws NoNetworkConnectionException {
         return confirmCredentials(context, login, password);

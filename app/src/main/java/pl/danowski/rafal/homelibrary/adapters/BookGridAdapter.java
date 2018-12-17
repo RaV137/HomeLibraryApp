@@ -96,7 +96,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
         @Override
         protected Void doInBackground(Book... books) {
             Book book = books[0];
-            BookService service = new BookService();
+            BookService service = BookService.getInstance();
             try {
                 service.updateBook(mContext, book);
             } catch (NoNetworkConnectionException e) {
@@ -122,7 +122,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            RoomService service = new RoomService();
+            RoomService service = RoomService.getInstance();
             try {
                 room = service.findRoomById(mContext, roomId);
             } catch (NoNetworkConnectionException e) {

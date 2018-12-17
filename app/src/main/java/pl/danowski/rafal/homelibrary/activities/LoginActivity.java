@@ -61,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             setTitle("Logowanie");
 
-            mUserService = new UserService();
+            mUserService = UserService.getInstance();
 
             Button mSignInButton = findViewById(R.id.loginButton);
             mSignInButton.setOnClickListener(new OnClickListener() {

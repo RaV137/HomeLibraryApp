@@ -15,9 +15,17 @@ public class UserController {
 
     private RestTemplate mRestTemplate;
 
-    public UserController() {
+    private UserController() {
         this.mRestTemplate = new RestTemplate();
         mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+    }
+
+    private static final class UserControllerHelper {
+        private static final UserController INSTANCE = new UserController();
+    }
+
+    public static UserController getInstance() {
+        return UserControllerHelper.INSTANCE;
     }
 
     public boolean createUser(CreateUser user) {

@@ -12,7 +12,20 @@ import pl.danowski.rafal.homelibrary.network.OnlineCheck;
 
 public class RoomService {
 
-    private final RoomController controller = new RoomController();
+    private final RoomController controller;
+
+    private RoomService() {
+        controller = RoomController.getInstance();
+    }
+
+    private static class RoomServiceHelper {
+        private static final RoomService INSTANCE = new RoomService();
+    }
+
+    public static RoomService getInstance() {
+        return RoomServiceHelper.INSTANCE;
+    }
+
 
     public Room createRoom(Context context, CreateRoom room) throws NoNetworkConnectionException {
         OnlineCheck.isOnline(context);

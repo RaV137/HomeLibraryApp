@@ -18,15 +18,23 @@ public class BookController {
 
     private RestTemplate mRestTemplate;
 
-    public BookController() {
+    private BookController() {
         this.mRestTemplate = new RestTemplate();
         mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+    }
+
+    private static final class BookControllerHelper {
+        private static final BookController INSTANCE = new BookController();
+    }
+
+    public static BookController getInstance() {
+        return BookControllerHelper.INSTANCE;
     }
 
     public Book createBook(final CreateBook book) {
         ResponseEntity<Book> exchange = mRestTemplate.exchange(Urls.getCreateUpdateBookUrl(), HttpMethod.POST, new HttpEntity<>(book), Book.class);
         HttpStatus statusCode = exchange.getStatusCode();
-        if(!statusCode.is2xxSuccessful()) {
+        if (!statusCode.is2xxSuccessful()) {
             return null;
         }
         return exchange.getBody();
@@ -67,7 +75,8 @@ public class BookController {
         String url = Urls.getFindBooksByQueryUrl(query);
         ResponseEntity<List<GBABook>> exchange;
         try {
-            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GBABook>>(){});
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GBABook>>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -84,7 +93,8 @@ public class BookController {
         String url = Urls.getFindBooksByUserUrl(login);
         ResponseEntity<List<Book>> exchange;
         try {
-            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>(){});
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;

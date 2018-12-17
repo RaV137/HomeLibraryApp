@@ -24,7 +24,7 @@ import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
-import pl.danowski.rafal.homelibrary.utiities.PasswordGenerator;
+import pl.danowski.rafal.homelibrary.utiities.password.PasswordGenerator;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
@@ -56,7 +56,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         mForgotPasswordFormView = findViewById(R.id.forgot_password_form);
         mProgressView = findViewById(R.id.forgot_password_progress);
-        mUserService = new UserService();
+        mUserService = UserService.getInstance();
 
         Button mForgotPasswordButton = findViewById(R.id.forgotPasswordButton);
         mForgotPasswordButton.setOnClickListener(new View.OnClickListener() {

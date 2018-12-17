@@ -147,7 +147,7 @@ public class BookInfoActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             super.doInBackground(voids);
 
-            BookService service = new BookService();
+            BookService service = BookService.getInstance();
             try {
                 service.updateBook(mContext, mBook);
             } catch (NoNetworkConnectionException e) {
@@ -181,12 +181,12 @@ public class BookInfoActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             super.doInBackground(voids);
 
-            BookService service = new BookService();
+            BookService service = BookService.getInstance();
             try {
                 mGBABook = service.findGBABookById(mContext, mGbaId);
                 mBook = service.findBookById(mContext, mBookId);
 
-                RoomService roomService = new RoomService();
+                RoomService roomService = RoomService.getInstance();
                 if (mBook != null) {
                     room = roomService.findRoomById(mContext, mBook.getRoomId());
                 }

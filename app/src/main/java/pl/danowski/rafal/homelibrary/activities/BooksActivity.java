@@ -36,7 +36,7 @@ public class BooksActivity extends AppCompatActivity {
     private List<Book> books;
     private ArrayAdapter<Book> adapter;
     private GridView gridViewBooks;
-    private final BookService mService = new BookService();
+    private final BookService mService = BookService.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

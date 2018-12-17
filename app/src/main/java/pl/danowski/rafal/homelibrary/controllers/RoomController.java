@@ -17,15 +17,23 @@ public class RoomController {
 
     private RestTemplate mRestTemplate;
 
-    public RoomController() {
+    private RoomController() {
         this.mRestTemplate = new RestTemplate();
         mRestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+    }
+
+    private static final class RoomControllerHelper {
+        private static final RoomController INSTANCE = new RoomController();
+    }
+
+    public static RoomController getInstance() {
+        return RoomControllerHelper.INSTANCE;
     }
 
     public Room createRoom(CreateRoom room) {
         ResponseEntity<Room> exchange = mRestTemplate.exchange(Urls.getCreateUpdateRoomUrl(), HttpMethod.POST, new HttpEntity<>(room), Room.class);
         HttpStatus statusCode = exchange.getStatusCode();
-        if(!statusCode.is2xxSuccessful()) {
+        if (!statusCode.is2xxSuccessful()) {
             return null;
         }
         return exchange.getBody();
@@ -60,7 +68,8 @@ public class RoomController {
         String url = Urls.getFindRoomsByUserLoginUrl(login);
         ResponseEntity<List<Room>> exchange;
         try {
-            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Room>>(){});
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Room>>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;

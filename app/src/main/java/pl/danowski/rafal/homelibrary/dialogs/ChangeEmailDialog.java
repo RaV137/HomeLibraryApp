@@ -32,7 +32,7 @@ public class ChangeEmailDialog extends DialogFragment {
     private EditText mEmail;
     private EditText mPassword;
     private View focusView = null;
-    private UserService userService = new UserService();
+    private UserService userService = UserService.getInstance();
 
     @Setter
     private Context mContext;

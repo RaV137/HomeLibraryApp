@@ -49,7 +49,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         setTitle("Rejestracja");
 
-        this.mUserService = new UserService();
+        this.mUserService = UserService.getInstance();
         String login = getIntent().getStringExtra(IntentExtras.LOGIN.getName());
 
         mLoginView = findViewById(R.id.textLogin);

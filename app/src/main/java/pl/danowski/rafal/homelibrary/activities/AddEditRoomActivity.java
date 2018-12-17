@@ -35,8 +35,8 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     private boolean edit;
     private Room currRoom;
-    private RoomService mService = new RoomService();
-    private UserService mUserService = new UserService();
+    private RoomService mService = RoomService.getInstance();
+    private UserService mUserService = UserService.getInstance();
     private int userId;
     private EditText mRoomName;
     private EditText mShortRoomName;

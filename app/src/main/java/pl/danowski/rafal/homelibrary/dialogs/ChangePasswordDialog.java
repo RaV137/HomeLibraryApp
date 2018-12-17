@@ -29,7 +29,7 @@ public class ChangePasswordDialog extends DialogFragment {
     private EditText mOldPassword;
     private EditText mNewPassword;
     private View focusView = null;
-    private UserService userService = new UserService();
+    private UserService userService = UserService.getInstance();
     private EditText mConfirmNewPassword;
 
     @Setter

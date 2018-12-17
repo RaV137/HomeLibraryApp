@@ -42,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
         TextView mLoginView = findViewById(R.id.login);
         mLoginView.setText(login);
 
-        mUserService = new UserService();
+        mUserService = UserService.getInstance();
         mEmailView = findViewById(R.id.email);
 
         UserCheckTask task = new UserCheckTask(login, this);

@@ -37,7 +37,7 @@ public class RoomsActivity extends AppCompatActivity {
     private List<Room> rooms;
     private ArrayAdapter<Room> adapter;
     private GridView gridViewRooms;
-    private final RoomService mService = new RoomService();
+    private final RoomService mService = RoomService.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +89,7 @@ public class RoomsActivity extends AppCompatActivity {
                 rooms = mService.findRoomsByUserLogin(mContext, login);
             } catch (NoNetworkConnectionException e) {
                 NoNetworkConnectionToast.show(mContext);
+                rooms = new ArrayList<>();
             }
             return null;
         }

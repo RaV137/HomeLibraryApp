@@ -19,7 +19,19 @@ import pl.danowski.rafal.homelibrary.network.OnlineCheck;
 
 public class BookService {
 
-    private final BookController controller = new BookController();
+    private final BookController controller;
+
+    private BookService() {
+        this.controller = BookController.getInstance();
+    }
+
+    private static final class BookControllerHelper {
+        private static final BookService INSTANCE = new BookService();
+    }
+
+    public static BookService getInstance() {
+        return BookControllerHelper.INSTANCE;
+    }
 
     public Book createBook(Context context, final CreateBook book) throws NoNetworkConnectionException {
         OnlineCheck.isOnline(context);
