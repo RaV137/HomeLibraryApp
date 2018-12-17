@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
@@ -41,6 +45,21 @@ public class RegisterActivity extends AppCompatActivity {
 
     private View mProgressView;
     private View mRegistrationFormView;
+
+    private List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(true);
             mAuthTask = new UserRegistrationTask(login, email, password, this);
             mAuthTask.execute((Void) null);
+            tasks.add(mAuthTask);
         }
     }
 

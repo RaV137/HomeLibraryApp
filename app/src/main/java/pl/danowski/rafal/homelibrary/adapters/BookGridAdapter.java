@@ -2,7 +2,6 @@ package pl.danowski.rafal.homelibrary.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -12,11 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.activities.BooksActivity;
 import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
 import pl.danowski.rafal.homelibrary.model.room.Room;
@@ -79,6 +78,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
                 currBook.setFavourite(!currBook.getFavourite());
                 UpdateBookTask task = new UpdateBookTask();
                 task.execute(currBook);
+                BooksActivity.getTasks().add(task);
                 notifyDataSetChanged();
             }
         });
@@ -87,7 +87,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
         Integer roomId = book.getRoomId();
         FindRoomByIdAndFindImageFromUrlTask task = new FindRoomByIdAndFindImageFromUrlTask(roomId, imageUrl);
         task.execute((Void) null);
-
+        BooksActivity.getTasks().add(task);
         return convertView;
     }
 
@@ -112,12 +112,14 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
         private String url;
         private Room room;
         private ImageView currCover;
+        private TextView currRoomAndShelf;
         private Bitmap bmp;
 
         FindRoomByIdAndFindImageFromUrlTask(int roomId, String url) {
             this.roomId = roomId;
             this.url = url;
             currCover = mCover;
+            currRoomAndShelf = mRoomAndShelf;
         }
 
         @Override
@@ -147,7 +149,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
             }
             Integer shelf = book.getShelfNumber();
             String roomAndShelf = room.getShortName() + "/" + shelf;
-            mRoomAndShelf.setText(roomAndShelf);
+            currRoomAndShelf.setText(roomAndShelf);
         }
     }
 }

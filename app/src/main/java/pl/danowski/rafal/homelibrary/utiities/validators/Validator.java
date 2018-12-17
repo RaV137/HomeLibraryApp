@@ -33,4 +33,8 @@ public class Validator {
         return result;
     }
 
+    public static boolean isValidRating(final int rating) {
+        return !(rating <= 0 || rating > 10);
+    }
+
 }

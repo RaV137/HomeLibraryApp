@@ -39,6 +39,21 @@ public class RoomsActivity extends AppCompatActivity {
     private GridView gridViewRooms;
     private final RoomService mService = RoomService.getInstance();
 
+    private List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +75,7 @@ public class RoomsActivity extends AppCompatActivity {
         String login = SharedPreferencesUtilities.getLogin(this);
         GetUserRoomsTask task = new GetUserRoomsTask(login, this);
         task.execute((Void) null);
+        tasks.add(task);
 
         FloatingActionButton fab = findViewById(R.id.addRoom);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -223,6 +239,7 @@ public class RoomsActivity extends AppCompatActivity {
     private void deleteRoom(long id) {
         DeleteRoomTask task = new DeleteRoomTask((int) id, this);
         task.execute((Void) null);
+        tasks.add(task);
     }
 
     private void editRoom(long id) {

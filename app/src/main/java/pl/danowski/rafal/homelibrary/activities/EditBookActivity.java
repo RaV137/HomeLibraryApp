@@ -1,17 +1,32 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
@@ -24,8 +39,9 @@ import pl.danowski.rafal.homelibrary.services.BookService;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
+import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
-public class BookInfoActivity extends AppCompatActivity {
+public class EditBookActivity extends AppCompatActivity {
 
     private Book mBook;
     private GBABook mGBABook;
@@ -36,17 +52,33 @@ public class BookInfoActivity extends AppCompatActivity {
     private TextView mPublisher;
     private ImageView mIsRead;
     private ImageView mIsFavourite;
-    private TextView mRating;
-    private TextView mRoom;
-    private TextView mShelf;
+    private EditText mRating;
+    private Spinner mRoom;
+    private EditText mShelf;
     private TextView mPageCount;
     private TextView mYearPublished;
     private TextView mIsbn;
 
     private String webUrl;
-
+    private BookService mService;
     private android.support.v7.app.ActionBar mActionBar;
 
+    private boolean edited = false;
+
+    private List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +88,13 @@ public class BookInfoActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        setContentView(R.layout.activity_book_info);
+        setContentView(R.layout.activity_edit_book);
 
         mActionBar = getSupportActionBar();
         assert mActionBar != null : "ActionBar is null!";
         mActionBar.setDisplayHomeAsUpEnabled(true);
+
+        mService = BookService.getInstance();
 
         mCover = findViewById(R.id.bookCover);
         mTitle = findViewById(R.id.title);
@@ -70,7 +104,7 @@ public class BookInfoActivity extends AppCompatActivity {
         mIsFavourite = findViewById(R.id.isFavourite);
         mRating = findViewById(R.id.rating);
         mRoom = findViewById(R.id.room);
-        mShelf = findViewById(R.id.shelf);
+        mShelf = findViewById(R.id.shelfInput);
         mPageCount = findViewById(R.id.pageCount);
         mYearPublished = findViewById(R.id.yearPublished);
         mIsbn = findViewById(R.id.isbn);
@@ -81,6 +115,7 @@ public class BookInfoActivity extends AppCompatActivity {
             String gbaID = extras.getString(IntentExtras.GBA_ID.getName());
             FindBookAndGBAByIdsTask task = new FindBookAndGBAByIdsTask(gbaID, bookId, this);
             task.execute((Void) null);
+            tasks.add(task);
         }
 
         Button mWebButton = findViewById(R.id.webView);
@@ -105,9 +140,121 @@ public class BookInfoActivity extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton fab = findViewById(R.id.saveBook);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                exitWithSaving();
+            }
+        });
+
+        mRating.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                notifyDataChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        mShelf.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                notifyDataChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (edited) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage("Czy chcesz wyjść bez zapisywania zmian?")
+                            .setTitle("Porzucić zmiany?")
+                            .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    exitWithoutSaving();
+                                }
+                            })
+                            .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    // dismiss the dialog
+                                }
+                            })
+                            .setNeutralButton("Zapisz", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    exitWithSaving();
+                                }
+                            })
+                            .create().show();
+                } else {
+                    exitWithoutSaving();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void exitWithoutSaving() {
+        finish();
+    }
+
+    private void exitWithSaving() {
+        String ratingString = mRating.getText().toString();
+        if (!TextUtils.isEmpty(ratingString)) {
+            Integer rating = Integer.parseInt(ratingString);
+            if (!Validator.isValidRating(rating)) {
+                mRating.setText("");
+                mRating.setError("Ocena musi się znajdować między 1 a 10.");
+                mRating.requestFocus();
+                return;
+            } else {
+                mBook.setRating(rating);
+            }
+        } else {
+            mBook.setRating(null);
+        }
+
+        String shelfString = mShelf.getText().toString();
+        if (!TextUtils.isEmpty(shelfString)) {
+            Integer shelf = Integer.parseInt(shelfString);
+            mBook.setShelfNumber(shelf);
+        } else {
+            mBook.setShelfNumber(null);
+        }
+
+        UpdateBookTask task = new UpdateBookTask(this);
+        task.execute();
+        tasks.add(task);
+        finish();
     }
 
     private void favouriteClicked() {
+        notifyDataChanged();
         boolean fav = mBook.getFavourite();
         mBook.setFavourite(!fav);
 
@@ -118,11 +265,14 @@ public class BookInfoActivity extends AppCompatActivity {
             isFavouriteDrawable = getResources().getDrawable(R.drawable.ic_star_border_black_24dp);
         }
         mIsFavourite.setImageDrawable(isFavouriteDrawable);
-        UpdateBookTask task = new UpdateBookTask(this);
-        task.execute();
+    }
+
+    private void notifyDataChanged() {
+        edited = true;
     }
 
     private void readClicked() {
+        notifyDataChanged();
         boolean read = mBook.getRead();
         mBook.setRead(!read);
 
@@ -133,23 +283,19 @@ public class BookInfoActivity extends AppCompatActivity {
             isReadDrawable = getResources().getDrawable(R.drawable.ic_check_circle_red_24dp);
         }
         mIsRead.setImageDrawable(isReadDrawable);
-        UpdateBookTask task = new UpdateBookTask(this);
-        task.execute();
     }
 
-    private class UpdateBookTask extends BaseAsyncTask<Void, Void , Void> {
+    private class UpdateBookTask extends BaseAsyncTask<Void, Void, Void> {
 
-        public UpdateBookTask(Context context) {
+        UpdateBookTask(Context context) {
             super(context);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             super.doInBackground(voids);
-
-            BookService service = BookService.getInstance();
             try {
-                service.updateBook(mContext, mBook);
+                mService.updateBook(mContext, mBook);
             } catch (NoNetworkConnectionException e) {
                 NoNetworkConnectionToast.show(mContext);
             }
@@ -162,7 +308,6 @@ public class BookInfoActivity extends AppCompatActivity {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
         startActivity(browserIntent);
     }
-
 
     private class FindBookAndGBAByIdsTask extends BaseAsyncTask<Void, Void, Void> {
 
@@ -180,11 +325,9 @@ public class BookInfoActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             super.doInBackground(voids);
-
-            BookService service = BookService.getInstance();
             try {
-                mGBABook = service.findGBABookById(mContext, mGbaId);
-                mBook = service.findBookById(mContext, mBookId);
+                mGBABook = mService.findGBABookById(mContext, mGbaId);
+                mBook = mService.findBookById(mContext, mBookId);
 
                 RoomService roomService = RoomService.getInstance();
                 if (mBook != null) {
@@ -192,7 +335,7 @@ public class BookInfoActivity extends AppCompatActivity {
                 }
 
                 String url = mGBABook.getThumbnailURL();
-                if(url != null) {
+                if (url != null) {
                     bmp = ImageDownloader.bitmapFromUrl(url);
                 } else {
                     bmp = null;
@@ -213,12 +356,11 @@ public class BookInfoActivity extends AppCompatActivity {
                 mTitle.setText(mBook.getTitle());
                 mAuthor.setText(mBook.getAuthor());
                 mPublisher.setText(mGBABook.getPublisher());
+                mShelf.setText(String.valueOf(mBook.getShelfNumber()));
 
-                String roomText = "Pokój: " + room.getName();
-                mRoom.setText(roomText);
-
-                String shelfText = "Nr półki: " + mBook.getShelfNumber();
-                mShelf.setText(shelfText);
+                // TODO
+//                String roomText = "Pokój: " + room.getName();
+//                mRoom.setText(roomText);
 
                 String pageCountText = "L. stron: " + mGBABook.getPageCount();
                 mPageCount.setText(pageCountText);
@@ -231,7 +373,7 @@ public class BookInfoActivity extends AppCompatActivity {
 
                 Integer rating = mBook.getRating();
                 if (rating == null) {
-                    mRating.setText("N/A");
+                    mRating.setText("");
                 } else {
                     mRating.setText(String.valueOf(rating));
                 }
@@ -254,7 +396,7 @@ public class BookInfoActivity extends AppCompatActivity {
 
                 webUrl = mGBABook.getPreviewLinkURL();
 
-                if(bmp != null) {
+                if (bmp != null) {
                     mCover.setImageBitmap(bmp);
                 } else {
                     mCover.setImageDrawable(getResources().getDrawable(R.drawable.book_96));

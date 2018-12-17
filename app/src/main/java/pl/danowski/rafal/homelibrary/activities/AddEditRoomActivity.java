@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,6 +16,9 @@ import android.widget.EditText;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -44,6 +47,21 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     @Setter(AccessLevel.PRIVATE)
     private int selectedColour;
+
+    private List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -74,11 +92,13 @@ public class AddEditRoomActivity extends AppCompatActivity {
             Integer roomId = extras.getInt(IntentExtras.ROOM_ID.getName());
             FindRoomByIdTask task = new FindRoomByIdTask(roomId, actionBar, this);
             task.execute((Void) null);
+            tasks.add(task);
         } else {
             actionBar.setTitle("Stwórz pokój");
             String login = SharedPreferencesUtilities.getLogin(this);
             FindUserByLoginTask task = new FindUserByLoginTask(login, this);
             task.execute((Void) null);
+            tasks.add(task);
         }
 
         Button okButton = findViewById(R.id.accept);
@@ -104,7 +124,7 @@ public class AddEditRoomActivity extends AppCompatActivity {
         } else {
             colour = Color.WHITE;
         }
-        AlertDialog dialog = ColorPickerDialogBuilder
+        ColorPickerDialogBuilder
                 .with(this)
                 .setTitle("Wybierz kolor")
                 .initialColor(colour)
@@ -124,8 +144,8 @@ public class AddEditRoomActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 })
-                .build();
-        dialog.show();
+                .build()
+                .show();
     }
 
     private void accept() {
@@ -167,19 +187,21 @@ public class AddEditRoomActivity extends AppCompatActivity {
     private void createRoom(CreateRoom room) {
         CreateRoomTask task = new CreateRoomTask(room, this);
         task.execute((Void) null);
+        tasks.add(task);
     }
 
     private void updateRoom() {
         UpdateRoomTask task = new UpdateRoomTask(this);
         task.execute((Void) null);
+        tasks.add(task);
     }
 
-    private class FindRoomByIdTask extends BaseAsyncTask<Void, Void, Void> {
+    private final class FindRoomByIdTask extends BaseAsyncTask<Void, Void, Void> {
 
         private int id;
         private android.support.v7.app.ActionBar actionBar;
 
-        public FindRoomByIdTask(int id, ActionBar actionBar, Context context) {
+        FindRoomByIdTask(int id, ActionBar actionBar, Context context) {
             super(context);
             this.id = id;
             this.actionBar = actionBar;
@@ -240,7 +262,7 @@ public class AddEditRoomActivity extends AppCompatActivity {
     private class UpdateRoomTask extends BaseAsyncTask<Void, Void, Void> {
 
         private UpdateRoomTask(Context context) {
-           super(context);
+            super(context);
         }
 
         @Override

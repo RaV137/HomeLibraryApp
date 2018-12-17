@@ -15,6 +15,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -39,6 +42,21 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private EditText mEmailView;
     private View mProgressView;
     private View mForgotPasswordFormView;
+
+    private List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +119,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             showProgress(true);
             mAuthTask = new ForgotPasswordTask(login, email, this);
             mAuthTask.execute((Void) null);
+            tasks.add(mAuthTask);
         }
     }
 
@@ -146,6 +165,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 sendEmailWithNewCredentials(email, password);
                 UpdatePasswordTask updatePasswordTask = new UpdatePasswordTask(login, password);
                 updatePasswordTask.execute((Void) null);
+                tasks.add(updatePasswordTask);
                 showConfirmationToast();
                 finish();
             } else {

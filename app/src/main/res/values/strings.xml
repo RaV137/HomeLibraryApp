@@ -55,4 +55,8 @@
     <string name="colour_desc">Kolor:</string>
     <string name="accept">Zatwierdź</string>
     <string name="no_rooms_info">Nie wprowadzono żadnego pokoju</string>
+    <string name="rating">Ocena</string>
+    <string name="shelf_number">Nr półki</string>
+    <string name="shelf_number_text">Nr półki:</string>
+    <string name="room_text">Pokój:</string>
 </resources>

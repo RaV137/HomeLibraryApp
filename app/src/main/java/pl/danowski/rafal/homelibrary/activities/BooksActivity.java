@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import lombok.Getter;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.adapters.BookGridAdapter;
 import pl.danowski.rafal.homelibrary.dialogs.SortBooksDialog;
@@ -37,6 +39,22 @@ public class BooksActivity extends AppCompatActivity {
     private ArrayAdapter<Book> adapter;
     private GridView gridViewBooks;
     private final BookService mService = BookService.getInstance();
+
+    @Getter
+    private static List<AsyncTask> tasks = new ArrayList<>();
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (AsyncTask task : tasks) {
+            if(task == null)
+                continue;
+            AsyncTask.Status status = task.getStatus();
+            if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
+                task.cancel(true);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +77,7 @@ public class BooksActivity extends AppCompatActivity {
         String login = SharedPreferencesUtilities.getLogin(this);
         GetUserBooksTask task = new GetUserBooksTask(login, this);
         task.execute((Void) null);
+        tasks.add(task);
 
         FloatingActionButton fab = findViewById(R.id.addBook);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -110,7 +129,7 @@ public class BooksActivity extends AppCompatActivity {
     }
 
     private void showBookInfo(Book book) {
-        Intent intent = new Intent(this, BookInfoActivity.class);
+        Intent intent = new Intent(this, EditBookActivity.class);
         intent.putExtra(IntentExtras.BOOK_ID.getName(), book.getId());
         intent.putExtra(IntentExtras.GBA_ID.getName(), book.getGoogleBooksId());
         startActivity(intent);
