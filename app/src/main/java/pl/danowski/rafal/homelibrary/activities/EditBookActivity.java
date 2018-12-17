@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -230,12 +231,37 @@ public class EditBookActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_single_item, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.delete:
+                new AlertDialog.Builder(this)
+                        .setMessage("Czy chcesz usunąć tę książkę?")
+                        .setTitle("Usuń książkę")
+                        .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteBook();
+                            }
+                        })
+                        .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // dismiss the dialog
+                            }
+                        })
+                        .create().show();
+                return true;
             case android.R.id.home:
                 if (edited) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Czy chcesz wyjść bez zapisywania zmian?")
+                    new AlertDialog.Builder(this)
+                            .setMessage("Czy chcesz wyjść bez zapisywania zmian?")
                             .setTitle("Porzucić zmiany?")
                             .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                                 @Override
@@ -263,6 +289,12 @@ public class EditBookActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void deleteBook() {
+        DeleteBookTask task = new DeleteBookTask(this);
+        task.execute((Void) null);
+        tasks.add(task);
     }
 
     private void exitWithoutSaving() {
@@ -335,6 +367,29 @@ public class EditBookActivity extends AppCompatActivity {
     private void openInBrowser() {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
         startActivity(browserIntent);
+    }
+
+    private class DeleteBookTask extends BaseAsyncTask<Void, Void, Void> {
+
+        DeleteBookTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            super.doInBackground(voids);
+            try {
+                mService.deleteBook(mContext, mBook.getId());
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            finish();
+        }
     }
 
     private class FindRoomByIdTask extends BaseAsyncTask<Integer, Void, Void> {

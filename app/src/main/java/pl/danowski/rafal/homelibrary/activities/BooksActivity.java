@@ -8,7 +8,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,7 +37,8 @@ import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class BooksActivity extends AppCompatActivity {
 
-    private List<Book> books;
+    private List<Book> allBooks;
+    private List<Book> currBooks;
     private ArrayAdapter<Book> adapter;
     private GridView gridViewBooks;
     private final BookService mService = BookService.getInstance();
@@ -47,7 +50,7 @@ public class BooksActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
@@ -66,7 +69,7 @@ public class BooksActivity extends AppCompatActivity {
         super.onStart();
         setContentView(R.layout.activity_books);
 
-        books = new ArrayList<>();
+        currBooks = new ArrayList<>();
         gridViewBooks = findViewById(R.id.booksGrid);
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
@@ -88,47 +91,7 @@ public class BooksActivity extends AppCompatActivity {
         });
     }
 
-    private final class GetUserBooksTask extends BaseAsyncTask<Void, Void, Void> {
-
-        private String login;
-
-        GetUserBooksTask(String login, Context context) {
-            super(context);
-            this.login = login;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                books = mService.findBooksByUserLogin(mContext, login);
-            } catch (NoNetworkConnectionException e) {
-                NoNetworkConnectionToast.show(mContext);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (books == null || books.size() == 0) {
-                TextView noRoomsInfo = findViewById(R.id.noBooksInfo);
-                noRoomsInfo.setVisibility(View.VISIBLE);
-                gridViewBooks.setVisibility(View.GONE);
-                return;
-            }
-            adapter = new BookGridAdapter(mContext, (ArrayList<Book>) books);
-            adapter.notifyDataSetChanged();
-            gridViewBooks.invalidateViews();
-            gridViewBooks.setAdapter(adapter);
-            gridViewBooks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        final int position, long id) {
-                    showBookInfo(books.get(position));
-                }
-            });
-        }
-    }
-
-    private void showBookInfo(Book book) {
+    private void editBook(Book book) {
         Intent intent = new Intent(this, EditBookActivity.class);
         intent.putExtra(IntentExtras.BOOK_ID.getName(), book.getId());
         intent.putExtra(IntentExtras.GBA_ID.getName(), book.getGoogleBooksId());
@@ -136,7 +99,37 @@ public class BooksActivity extends AppCompatActivity {
     }
 
     private void addBook() {
+        // TODO
+    }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.room_context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.edit:
+                Book book = currBooks.get((int) info.id);
+                editBook(book);
+                return true;
+            case R.id.delete:
+                Integer bookId = currBooks.get((int) info.id).getId();
+                deleteBook(bookId);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deleteBook(Integer bookId) {
+        DeleteBookTask task = new DeleteBookTask(this);
+        task.execute(bookId);
+        tasks.add(task);
     }
 
     @Override
@@ -190,7 +183,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByScoreAsc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 Integer r1 = b1.getRating();
@@ -211,7 +204,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByScoreDesc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 Integer r1 = b1.getRating();
@@ -232,7 +225,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByTitleAsc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 return b1.getTitle().compareTo(b2.getTitle());
@@ -243,7 +236,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByTitleDesc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 return b2.getTitle().compareTo(b1.getTitle());
@@ -254,7 +247,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByAuthorAsc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 return b1.getAuthor().compareTo(b2.getAuthor());
@@ -265,7 +258,7 @@ public class BooksActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi")
     public void sortByAuthorDesc() {
-        books.sort(new Comparator<Book>() {
+        currBooks.sort(new Comparator<Book>() {
             @Override
             public int compare(Book b1, Book b2) {
                 return b2.getAuthor().compareTo(b1.getAuthor());
@@ -278,4 +271,68 @@ public class BooksActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
+
+    private class DeleteBookTask extends BaseAsyncTask<Integer, Void, Void> {
+
+        DeleteBookTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected Void doInBackground(Integer... ints) {
+            super.doInBackground(ints);
+            try {
+                mService.deleteBook(mContext, ints[0]);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            finish();
+        }
+    }
+
+    private final class GetUserBooksTask extends BaseAsyncTask<Void, Void, Void> {
+
+        private String login;
+
+        GetUserBooksTask(String login, Context context) {
+            super(context);
+            this.login = login;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                currBooks = mService.findBooksByUserLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (currBooks == null || currBooks.size() == 0) {
+                TextView noRoomsInfo = findViewById(R.id.noBooksInfo);
+                noRoomsInfo.setVisibility(View.VISIBLE);
+                gridViewBooks.setVisibility(View.GONE);
+                return;
+            }
+            adapter = new BookGridAdapter(mContext, (ArrayList<Book>) currBooks);
+            adapter.notifyDataSetChanged();
+            gridViewBooks.invalidateViews();
+            gridViewBooks.setAdapter(adapter);
+            gridViewBooks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        final int position, long id) {
+                    editBook(currBooks.get(position));
+                }
+            });
+        }
+    }
+
 }

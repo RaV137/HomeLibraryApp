@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -81,7 +82,22 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.delete:
-                deleteRoom();
+                new AlertDialog.Builder(this)
+                        .setMessage("Czy chcesz usunąć ten pokój?")
+                        .setTitle("Usuń pokój")
+                        .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteRoom();
+                            }
+                        })
+                        .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // dismiss the dialog
+                            }
+                        })
+                        .create().show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
