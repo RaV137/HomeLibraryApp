@@ -51,4 +51,9 @@ public class BookService {
         return controller.findBooksByUserLogin(login);
     }
 
+    public Book findBookById(Context context, final Integer id) throws NoNetworkConnectionException {
+        OnlineCheck.isOnline(context);
+        return controller.findBookById(id);
+    }
+
 }

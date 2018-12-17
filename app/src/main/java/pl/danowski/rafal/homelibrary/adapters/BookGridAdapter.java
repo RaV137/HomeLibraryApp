@@ -21,6 +21,7 @@ import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
 import pl.danowski.rafal.homelibrary.model.room.Room;
 import pl.danowski.rafal.homelibrary.network.ImageDownloader;
+import pl.danowski.rafal.homelibrary.services.BookService;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
@@ -76,6 +77,8 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
             public void onClick(View view) {
                 Book currBook = books.get(position);
                 currBook.setFavourite(!currBook.getFavourite());
+                UpdateBookTask task = new UpdateBookTask();
+                task.execute(currBook);
                 notifyDataSetChanged();
             }
         });
@@ -86,6 +89,21 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
         task.execute((Void) null);
 
         return convertView;
+    }
+
+    private class UpdateBookTask extends AsyncTask<Book, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Book... books) {
+            Book book = books[0];
+            BookService service = new BookService();
+            try {
+                service.updateBook(mContext, book);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
     }
 
     private class FindRoomByIdAndFindImageFromUrlTask extends AsyncTask<Void, Void, Void> {
@@ -111,7 +129,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
                 NoNetworkConnectionToast.show(mContext);
                 return null;
             }
-            if(url != null) {
+            if (url != null) {
                 bmp = ImageDownloader.bitmapFromUrl(url);
             } else {
                 bmp = null;

@@ -2,6 +2,7 @@ package pl.danowski.rafal.homelibrary.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -25,6 +26,7 @@ import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.book.Book;
 import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.BookService;
+import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.enums.SortOptionEnum;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
@@ -39,7 +41,6 @@ public class BooksActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -109,7 +110,10 @@ public class BooksActivity extends AppCompatActivity {
     }
 
     private void showBookInfo(Book book) {
-
+        Intent intent = new Intent(this, BookInfoActivity.class);
+        intent.putExtra(IntentExtras.BOOK_ID.getName(), book.getId());
+        intent.putExtra(IntentExtras.GBA_ID.getName(), book.getGoogleBooksId());
+        startActivity(intent);
     }
 
     private void addBook() {

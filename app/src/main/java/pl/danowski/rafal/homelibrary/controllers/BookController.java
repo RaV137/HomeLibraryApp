@@ -96,4 +96,21 @@ public class BookController {
             return exchange.getBody();
         }
     }
+
+    public Book findBookById(final Integer id) {
+        String url = Urls.getFindBookByIdUrl(id);
+        ResponseEntity<Book> exchange;
+        try {
+            exchange = mRestTemplate.exchange(url, HttpMethod.GET, null, Book.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        HttpStatus statusCode = exchange.getStatusCode();
+        if (statusCode != HttpStatus.OK) {
+            return null;
+        } else {
+            return exchange.getBody();
+        }
+    }
 }

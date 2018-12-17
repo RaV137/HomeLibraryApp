@@ -45,13 +45,14 @@ final class Urls {
     private static String BOOKS_URL = "/books";
     private static String FIND_BOOKS_BY_QUERY_URL = "/query/";
     private static String FIND_BOOKS_BY_USER_URL = "/user/";
+    private static String FIND_BOOKS_BY_ID_URL = "/id/";
 
     static String getCreateUpdateBookUrl() {
         return BASE_URL + BOOKS_URL;
     }
 
     static String getFindBookByIdUrl(String id) {
-        return BASE_URL + BOOKS_URL + id;
+        return BASE_URL + BOOKS_URL + "/" + id;
     }
 
     static String getDeleteBookUrl(int id) {
@@ -64,5 +65,9 @@ final class Urls {
 
     static String getFindBooksByUserUrl(String login) {
         return BASE_URL + BOOKS_URL + FIND_BOOKS_BY_USER_URL + login;
+    }
+
+    static String getFindBookByIdUrl(Integer id) {
+        return BASE_URL + BOOKS_URL + FIND_BOOKS_BY_ID_URL + id;
     }
 }
