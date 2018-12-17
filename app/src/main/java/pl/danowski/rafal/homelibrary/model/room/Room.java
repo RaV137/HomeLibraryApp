@@ -12,4 +12,9 @@ public class Room {
     private String colour;
     private String shortName;
     private Integer userId;
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

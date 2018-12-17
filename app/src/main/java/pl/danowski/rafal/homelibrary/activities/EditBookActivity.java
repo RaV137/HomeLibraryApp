@@ -17,6 +17,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -38,13 +40,19 @@ import pl.danowski.rafal.homelibrary.network.ImageDownloader;
 import pl.danowski.rafal.homelibrary.services.BookService;
 import pl.danowski.rafal.homelibrary.services.RoomService;
 import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
+import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
+
+import static android.R.layout.simple_spinner_dropdown_item;
+import static android.R.layout.simple_spinner_item;
 
 public class EditBookActivity extends AppCompatActivity {
 
     private Book mBook;
     private GBABook mGBABook;
+    private ArrayList<Room> rooms;
+    private Room currRoom;
 
     private ImageView mCover;
     private TextView mTitle;
@@ -59,8 +67,12 @@ public class EditBookActivity extends AppCompatActivity {
     private TextView mYearPublished;
     private TextView mIsbn;
 
+    private TextView mRoomTextView;
+
     private String webUrl;
     private BookService mService;
+    private RoomService mRoomService;
+
     private android.support.v7.app.ActionBar mActionBar;
 
     private boolean edited = false;
@@ -71,7 +83,7 @@ public class EditBookActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
@@ -95,6 +107,7 @@ public class EditBookActivity extends AppCompatActivity {
         mActionBar.setDisplayHomeAsUpEnabled(true);
 
         mService = BookService.getInstance();
+        mRoomService = RoomService.getInstance();
 
         mCover = findViewById(R.id.bookCover);
         mTitle = findViewById(R.id.title);
@@ -181,6 +194,39 @@ public class EditBookActivity extends AppCompatActivity {
 
             }
         });
+
+        mRoom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (mRoomTextView == null) {
+                    mRoomTextView = (TextView) adapterView.getChildAt(0);
+                }
+
+                currRoom = (Room) adapterView.getSelectedItem();
+                if (currRoom != null) {
+                    updateSpinnerCurrValue(currRoom.getId());
+                    notifyDataChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                if (mRoomTextView == null) {
+                    mRoomTextView = (TextView) adapterView.getChildAt(0);
+                }
+                mRoomTextView.setError("Wybierz pokój.");
+            }
+        });
+
+        FindRoomsTask task = new FindRoomsTask(this);
+        task.execute();
+        tasks.add(task);
+    }
+
+    private void updateSpinnerCurrValue(Integer id) {
+        FindRoomByIdTask task = new FindRoomByIdTask(this);
+        task.execute(id);
+        tasks.add(task);
     }
 
     @Override
@@ -247,9 +293,10 @@ public class EditBookActivity extends AppCompatActivity {
             mBook.setShelfNumber(null);
         }
 
+        mBook.setRoomId(currRoom.getId());
+
         UpdateBookTask task = new UpdateBookTask(this);
-        task.execute();
-        tasks.add(task);
+        task.execute(); // brak dodania do kolejki, bo ten task musi się wykonać, nie można go ubić
         finish();
     }
 
@@ -285,6 +332,66 @@ public class EditBookActivity extends AppCompatActivity {
         mIsRead.setImageDrawable(isReadDrawable);
     }
 
+    private void openInBrowser() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
+        startActivity(browserIntent);
+    }
+
+    private class FindRoomByIdTask extends BaseAsyncTask<Integer, Void, Void> {
+
+        public FindRoomByIdTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected Void doInBackground(Integer... ints) {
+            super.doInBackground(ints);
+            try {
+                currRoom = mRoomService.findRoomById(mContext, ints[0]);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (mRoomTextView != null) {
+                if (currRoom != null) {
+                    String roomText = currRoom.getName();
+                    mRoomTextView.setText(roomText);
+                }
+            }
+        }
+    }
+
+    private class FindRoomsTask extends BaseAsyncTask<Void, Void, Void> {
+
+        public FindRoomsTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            super.doInBackground(voids);
+            String login = SharedPreferencesUtilities.getLogin(mContext);
+            try {
+                rooms = (ArrayList<Room>) mRoomService.findRoomsByUserLogin(mContext, login);
+            } catch (NoNetworkConnectionException e) {
+                NoNetworkConnectionToast.show(mContext);
+                rooms = new ArrayList<>();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            ArrayAdapter<Room> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_item_layout, rooms);
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_layout);
+            mRoom.setAdapter(adapter);
+        }
+    }
+
     private class UpdateBookTask extends BaseAsyncTask<Void, Void, Void> {
 
         UpdateBookTask(Context context) {
@@ -299,21 +406,14 @@ public class EditBookActivity extends AppCompatActivity {
             } catch (NoNetworkConnectionException e) {
                 NoNetworkConnectionToast.show(mContext);
             }
-
             return null;
         }
-    }
-
-    private void openInBrowser() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
-        startActivity(browserIntent);
     }
 
     private class FindBookAndGBAByIdsTask extends BaseAsyncTask<Void, Void, Void> {
 
         private String mGbaId;
         private Integer mBookId;
-        private Room room;
         private Bitmap bmp;
 
         FindBookAndGBAByIdsTask(String gbaId, Integer bookId, Context context) {
@@ -328,11 +428,6 @@ public class EditBookActivity extends AppCompatActivity {
             try {
                 mGBABook = mService.findGBABookById(mContext, mGbaId);
                 mBook = mService.findBookById(mContext, mBookId);
-
-                RoomService roomService = RoomService.getInstance();
-                if (mBook != null) {
-                    room = roomService.findRoomById(mContext, mBook.getRoomId());
-                }
 
                 String url = mGBABook.getThumbnailURL();
                 if (url != null) {
@@ -353,14 +448,12 @@ public class EditBookActivity extends AppCompatActivity {
             if (mBook != null && mGBABook != null) {
                 mActionBar.setTitle(mBook.getTitle());
 
+                updateSpinnerCurrValue(mBook.getRoomId());
+
                 mTitle.setText(mBook.getTitle());
                 mAuthor.setText(mBook.getAuthor());
                 mPublisher.setText(mGBABook.getPublisher());
                 mShelf.setText(String.valueOf(mBook.getShelfNumber()));
-
-                // TODO
-//                String roomText = "Pokój: " + room.getName();
-//                mRoom.setText(roomText);
 
                 String pageCountText = "L. stron: " + mGBABook.getPageCount();
                 mPageCount.setText(pageCountText);
