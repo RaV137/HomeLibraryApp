@@ -43,6 +43,8 @@ public class BooksActivity extends AppCompatActivity {
     private GridView gridViewBooks;
     private final BookService mService = BookService.getInstance();
 
+    private Integer roomId = null;
+
     @Getter
     private static List<AsyncTask> tasks = new ArrayList<>();
 
@@ -76,6 +78,11 @@ public class BooksActivity extends AppCompatActivity {
         assert actionBar != null : "ActionBar is null!";
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.all_books_activity_title);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            roomId = extras.getInt(IntentExtras.ROOM_ID.getName());
+        }
 
         String login = SharedPreferencesUtilities.getLogin(this);
         GetUserBooksTask task = new GetUserBooksTask(login, this);
@@ -307,7 +314,7 @@ public class BooksActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                currBooks = mService.findBooksByUserLogin(mContext, login);
+                allBooks = mService.findBooksByUserLogin(mContext, login);
             } catch (NoNetworkConnectionException e) {
                 NoNetworkConnectionToast.show(mContext);
             }
@@ -315,7 +322,24 @@ public class BooksActivity extends AppCompatActivity {
         }
 
         @Override
+        @SuppressLint("NewApi")
         protected void onPostExecute(Void aVoid) {
+            if (roomId != null) {
+//                currBooks = allBooks.stream().filter(book -> book.getRoomId().equals(roomId)).collect(Collectors.toList());
+                if (currBooks == null) {
+                    currBooks = new ArrayList<>();
+                }
+
+                for (Book book : allBooks) {
+                    if (book.getRoomId().equals(roomId)) {
+                        currBooks.add(book);
+                    }
+                }
+
+            } else {
+                currBooks = allBooks;
+            }
+
             if (currBooks == null || currBooks.size() == 0) {
                 TextView noRoomsInfo = findViewById(R.id.noBooksInfo);
                 noRoomsInfo.setVisibility(View.VISIBLE);
