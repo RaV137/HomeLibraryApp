@@ -1,6 +1,7 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -11,10 +12,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import pl.danowski.rafal.homelibrary.R;
+import pl.danowski.rafal.homelibrary.dialogs.SearchDialog;
+import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 
 public class MainMenuActivity extends AppCompatActivity {
 
+    private Context mContext = this; // głupie wyjście, może warto poprawić?
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +29,6 @@ public class MainMenuActivity extends AppCompatActivity {
         assert actionBar != null : "ActionBar is null!";
         actionBar.setDisplayHomeAsUpEnabled(false);
         actionBar.setTitle("Home library");
-
-        boolean userLoggedIn = SharedPreferencesUtilities.isUserLoggedIn(getApplicationContext());
 
         Button myBooksButton = findViewById(R.id.myBooks);
         myBooksButton.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +62,7 @@ public class MainMenuActivity extends AppCompatActivity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                settings();
+                search();
             }
         });
         Button logOutButton = findViewById(R.id.logOut);
@@ -70,7 +72,6 @@ public class MainMenuActivity extends AppCompatActivity {
                 logOut();
             }
         });
-
     }
 
     private void myBooks() {
@@ -89,13 +90,21 @@ public class MainMenuActivity extends AppCompatActivity {
         Toast.makeText(this, "Zawartość czasowo niedostępna", Toast.LENGTH_SHORT).show();
     }
 
-    private void settings() {
-        // TODO
+    private void search() {
+        SearchDialog dialog = new SearchDialog();
+        dialog.setDialogResult(new SearchDialog.OnMyDialogResult() {
+            public void finish(String query) {
+                Intent intent = new Intent(mContext, BooksActivity.class);
+                intent.putExtra(IntentExtras.QUERY.getName(), query);
+                startActivity(intent);
+            }
+        });
+        dialog.show(getFragmentManager(), "SearchDialog");
     }
 
     private void logOut() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Wylogowywanie")
+        new AlertDialog.Builder(this)
+                .setTitle("Wylogowywanie")
                 .setMessage("Czy na pewno chcesz się wylogować?")
                 .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -114,8 +123,6 @@ public class MainMenuActivity extends AppCompatActivity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-        // TODO - nic nie rób = wyświetlanie tylko w pozycji portretowej
     }
 
 }

@@ -59,4 +59,5 @@
     <string name="shelf_number">Nr</string>
     <string name="shelf_number_text">Nr półki:</string>
     <string name="room_text">Pokój:</string>
+    <string name="query_hint">Czego szukasz?</string>
 </resources>

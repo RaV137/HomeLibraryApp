@@ -44,6 +44,7 @@ public class BooksActivity extends AppCompatActivity {
     private final BookService mService = BookService.getInstance();
 
     private Integer roomId = null;
+    private String query = null;
 
     @Getter
     private static List<AsyncTask> tasks = new ArrayList<>();
@@ -82,6 +83,7 @@ public class BooksActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             roomId = extras.getInt(IntentExtras.ROOM_ID.getName());
+            query = extras.getString(IntentExtras.QUERY.getName());
         }
 
         String login = SharedPreferencesUtilities.getLogin(this);
@@ -324,18 +326,22 @@ public class BooksActivity extends AppCompatActivity {
         @Override
         @SuppressLint("NewApi")
         protected void onPostExecute(Void aVoid) {
-            if (roomId != null) {
+            if (currBooks == null) {
+                currBooks = new ArrayList<>();
+            }
+            if (roomId != null && roomId > 0) {
 //                currBooks = allBooks.stream().filter(book -> book.getRoomId().equals(roomId)).collect(Collectors.toList());
-                if (currBooks == null) {
-                    currBooks = new ArrayList<>();
-                }
-
                 for (Book book : allBooks) {
                     if (book.getRoomId().equals(roomId)) {
                         currBooks.add(book);
                     }
                 }
-
+            } else if (query != null) {
+                for (Book book : allBooks) {
+                    if (book.getTitle().toLowerCase().contains(query.toLowerCase()) || book.getAuthor().toLowerCase().contains(query.toLowerCase())) {
+                        currBooks.add(book);
+                    }
+                }
             } else {
                 currBooks = allBooks;
             }

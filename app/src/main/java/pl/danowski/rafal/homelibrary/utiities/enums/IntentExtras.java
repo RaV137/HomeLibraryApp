@@ -11,7 +11,8 @@ public enum IntentExtras {
     ROOM_ID("roomId"),
     EDIT_ROOM("editRoom"),
     BOOK_ID("bookId"),
-    GBA_ID("gbaId");
+    GBA_ID("gbaId"),
+    QUERY("query");
 
     private String name;
 }
