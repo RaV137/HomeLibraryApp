@@ -38,7 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
@@ -121,10 +121,17 @@ public class ProfileActivity extends AppCompatActivity {
             super(context);
         }
 
+        private String login;
+
+        @Override
+        protected void onPreExecute() {
+            login = SharedPreferencesUtilities.getLogin(getApplicationContext());
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
-            String login = SharedPreferencesUtilities.getLogin(getApplicationContext());
-            User user = null;
+            // TODO add password dialog for deleting user
+            User user;
             try {
                 user = mUserService.findUserByLogin(mContext, login);
             } catch (NoNetworkConnectionException e) {

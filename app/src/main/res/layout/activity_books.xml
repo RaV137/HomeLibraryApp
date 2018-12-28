@@ -35,7 +35,7 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="20dp"
         android:gravity="center"
-        android:text="@string/no_rooms_info"
+        android:text="@string/no_books_info"
         android:textSize="20sp"
         android:visibility="gone" />
 

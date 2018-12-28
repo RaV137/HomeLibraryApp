@@ -10,7 +10,7 @@ final class Urls {
     private static final String FIND_USER_BY_LOGIN_URL = "/login/";
 
     static String getDeleteUserUrl(String login) {
-        return BASE_URL + USERS_URL + login;
+        return BASE_URL + USERS_URL + "/" + login;
     }
 
     static String getFindUserByEmailUrl(String email) {

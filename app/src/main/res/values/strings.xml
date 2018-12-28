@@ -25,7 +25,7 @@
     <string name="register_prompt_password">Hasło</string>
     <string name="register_prompt_login">Login</string>
     <string name="registration_label">Rejestracja</string>
-    <string name="login_remind_password">Przypomnij mi hasło</string>
+    <string name="login_remind_password">Zapomniałeś hasła?</string>
     <string name="email">Email</string>
     <string name="action_forgot_password">Przypomnij hasło</string>
     <string name="login_remember_me">Zapamiętaj mnie</string>
@@ -60,4 +60,5 @@
     <string name="shelf_number_text">Nr półki:</string>
     <string name="room_text">Pokój:</string>
     <string name="query_hint">Czego szukasz?</string>
+    <string name="no_books_info">Nie wprowadzono żadnej książki</string>
 </resources>
