@@ -77,6 +77,9 @@ public class EditBookActivity extends AppCompatActivity {
     private android.support.v7.app.ActionBar mActionBar;
 
     private boolean edited = false;
+    private boolean firstPopulationOfEditText1 = true;
+    private boolean firstPopulationOfEditText2 = true;
+    private boolean firstPopulationOfSpinner = true;
 
     private List<AsyncTask> tasks = new ArrayList<>();
 
@@ -170,7 +173,11 @@ public class EditBookActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                notifyDataChanged();
+                if (firstPopulationOfEditText1) {
+                    firstPopulationOfEditText1 = false;
+                } else {
+                    notifyDataChanged();
+                }
             }
 
             @Override
@@ -187,7 +194,11 @@ public class EditBookActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                notifyDataChanged();
+                if (firstPopulationOfEditText2) {
+                    firstPopulationOfEditText2 = false;
+                } else {
+                    notifyDataChanged();
+                }
             }
 
             @Override
@@ -206,7 +217,11 @@ public class EditBookActivity extends AppCompatActivity {
                 currRoom = (Room) adapterView.getSelectedItem();
                 if (currRoom != null) {
                     updateSpinnerCurrValue(currRoom.getId());
-                    notifyDataChanged();
+                    if (firstPopulationOfSpinner) {
+                        firstPopulationOfSpinner = false;
+                    } else {
+                        notifyDataChanged();
+                    }
                 }
             }
 

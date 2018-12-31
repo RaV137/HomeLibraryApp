@@ -14,7 +14,11 @@ public final class SendEmailTask extends BaseAsyncTask<Void, Void, Void> {
 
     public SendEmailTask(String body, String subject, String email, Context context) {
         super(context);
-        this.body = body;
+        String disclaimer = "\n\nWiadomość email generowana automatycznie. " +
+                "Proszę, nie odpowiadaj na tego maila.\n" +
+                "Właścicielem Twoich danych jest właściciel maila home.library.dev@gmail.com." +
+                "Jeżeli chcesz usunąć swoje dane, usuń konto w aplikacji.";
+        this.body = body + disclaimer;
         this.subject = subject;
         this.email = email;
     }
