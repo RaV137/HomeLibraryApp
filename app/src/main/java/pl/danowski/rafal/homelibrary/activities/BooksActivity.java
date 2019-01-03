@@ -1,6 +1,7 @@
 package pl.danowski.rafal.homelibrary.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -108,7 +109,9 @@ public class BooksActivity extends AppCompatActivity {
     }
 
     private void addBook() {
-        // TODO
+        Intent intent = new Intent(this, AddGBABookActivity.class);
+        startActivity(intent);
+//        finish();
     }
 
     @Override

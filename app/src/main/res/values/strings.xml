@@ -61,4 +61,6 @@
     <string name="room_text">Pokój:</string>
     <string name="query_hint">Czego szukasz?</string>
     <string name="no_books_info">Nie wprowadzono żadnej książki</string>
+    <string name="no_gba_books_info">Nie znaleziono żadnych pasujących książek do Twojego zapytana</string>
+    <string name="book_query_hint">Czego szukasz?</string>
 </resources>

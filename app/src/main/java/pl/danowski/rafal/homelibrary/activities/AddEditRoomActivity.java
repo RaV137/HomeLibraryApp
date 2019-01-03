@@ -57,7 +57,7 @@ public class AddEditRoomActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
@@ -72,7 +72,7 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(edit) {
+        if (edit) {
             getMenuInflater().inflate(R.menu.menu_single_item, menu);
         }
         return true;
@@ -80,7 +80,7 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(edit) {
+        if (edit) {
             int id = item.getItemId();
             switch (id) {
                 case R.id.delete:

@@ -142,7 +142,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (url != null) {
+            if (bmp != null) {
                 currCover.setImageBitmap(bmp);
             } else {
                 currCover.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_library_books_black_24dp));
