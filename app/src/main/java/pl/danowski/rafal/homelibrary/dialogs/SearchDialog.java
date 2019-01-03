@@ -26,7 +26,7 @@ public class SearchDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setTitle("Wyszukaj książkę")
-                .setView(inflater.inflate(R.layout.search_book_dialog, null))
+                .setView(inflater.inflate(R.layout.dialog_search_book, null))
                 .setNegativeButton("ANULUJ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

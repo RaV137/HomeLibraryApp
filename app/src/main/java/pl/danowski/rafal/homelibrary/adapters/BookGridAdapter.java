@@ -44,7 +44,7 @@ public class BookGridAdapter extends ArrayAdapter<Book> {
 
         book = getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.book_grid_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_book, parent, false);
         }
 
         TextView mTitle = convertView.findViewById(R.id.title);

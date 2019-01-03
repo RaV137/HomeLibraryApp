@@ -19,6 +19,7 @@ import java.util.List;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.dialogs.ChangeEmailDialog;
 import pl.danowski.rafal.homelibrary.dialogs.ChangePasswordDialog;
+import pl.danowski.rafal.homelibrary.dialogs.DeleteAccountDialog;
 import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.user.User;
 import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
@@ -92,27 +93,41 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void deleteAccount() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Usuń konto")
-                .setMessage("Czy na pewno chcesz usunąć konto? Tej decyzji nie można cofnąć.")
-                .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        DeleteAccountTask task = new DeleteAccountTask(getBaseContext()); // TODO obsługa błędów internetu
-                        task.execute((Void) null);
-                        tasks.add(task);
-                        SharedPreferencesUtilities.deleteLogin(getApplicationContext());
-                        SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);
-                        finish();
-                        Intent intent = new Intent(getBaseContext(), LoginActivity.class);
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                })
-                .create()
-                .show();
+        final Context tmpContext = this;
+        DeleteAccountDialog dialog = new DeleteAccountDialog();
+        dialog.setMContext(tmpContext);
+        dialog.setDialogResult(new DeleteAccountDialog.OnMyDialogResult() {
+            public void finish(boolean success) {
+                if (success) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(tmpContext);
+                    builder.setTitle("Usuń konto")
+                            .setMessage("Czy na pewno chcesz usunąć konto? Tej decyzji nie można cofnąć.")
+                            .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    finishDeletionOfAccount();
+                                }
+                            })
+                            .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            })
+                            .create()
+                            .show();
+                }
+            }
+        });
+        dialog.show(getFragmentManager(), "DeleteAccountDialog");
+    }
+
+    private void finishDeletionOfAccount() {
+        DeleteAccountTask task = new DeleteAccountTask(getBaseContext()); // TODO obsługa błędów internetu
+        task.execute((Void) null);
+//                        tasks.add(task);
+        SharedPreferencesUtilities.deleteLogin(getApplicationContext());
+        SharedPreferencesUtilities.setAutologin(getApplicationContext(), false);
+        finish();
+        Intent intent = new Intent(getBaseContext(), LoginActivity.class);
+        startActivity(intent);
     }
 
     private class DeleteAccountTask extends BaseAsyncTask<Void, Void, Void> {
@@ -130,7 +145,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            // TODO add password dialog for deleting user
             User user;
             try {
                 user = mUserService.findUserByLogin(mContext, login);

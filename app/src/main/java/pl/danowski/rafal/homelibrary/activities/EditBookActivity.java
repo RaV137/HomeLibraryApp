@@ -26,8 +26,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,9 +42,6 @@ import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
-
-import static android.R.layout.simple_spinner_dropdown_item;
-import static android.R.layout.simple_spinner_item;
 
 public class EditBookActivity extends AppCompatActivity {
 
@@ -456,8 +451,8 @@ public class EditBookActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            ArrayAdapter<Room> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_item_layout, rooms);
-            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_layout);
+            ArrayAdapter<Room> adapter = new ArrayAdapter<>(mContext, R.layout.item_spinner, rooms);
+            adapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
             mRoom.setAdapter(adapter);
         }
     }

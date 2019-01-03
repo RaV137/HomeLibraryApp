@@ -26,10 +26,9 @@ import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreference
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
-public class ChangeEmailDialog extends DialogFragment {
+public class DeleteAccountDialog extends DialogFragment {
 
     private OnMyDialogResult mDialogResult; // the callback
-    private EditText mEmail;
     private EditText mPassword;
     private View focusView = null;
     private UserService userService = UserService.getInstance();
@@ -42,7 +41,8 @@ public class ChangeEmailDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.dialog_change_email, null))
+        builder.setTitle("Usuń konto")
+                .setView(inflater.inflate(R.layout.dialog_delete_account, null))
                 .setNegativeButton("ANULUJ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -65,42 +65,32 @@ public class ChangeEmailDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mEmail = d.findViewById(R.id.newEmail);
                     mPassword = d.findViewById(R.id.password);
 
-                    String email = mEmail.getText().toString();
                     String password = mPassword.getText().toString();
-
                     String login = SharedPreferencesUtilities.getLogin(getActivity().getApplicationContext());
-                    HandleChangeEmailTask task = new HandleChangeEmailTask(login, email, password, d);
+                    HandleDeleteAccountTask task = new HandleDeleteAccountTask(login, password, d);
                     task.execute((Void) null);
                 }
             });
         }
     }
 
-    public class HandleChangeEmailTask extends AsyncTask<Void, Void, Boolean> {
+    public class HandleDeleteAccountTask extends AsyncTask<Void, Void, Boolean> {
 
         private String login;
-        private String email;
         private String password;
         private AlertDialog d;
 
-        public HandleChangeEmailTask(String login, String email, String password, AlertDialog d) {
+        public HandleDeleteAccountTask(String login, String password, AlertDialog d) {
             this.login = login;
-            this.email = email;
             this.password = password;
             this.d = d;
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            boolean exit = true;
-            if (TextUtils.isEmpty(email)) {
-                focusView = mEmail;
-                mEmail.setError("Pole wymagane");
-                exit = false;
-            } else if (TextUtils.isEmpty(password)) {
+            boolean exit = true;if (TextUtils.isEmpty(password)) {
                 focusView = mPassword;
                 mPassword.setError("Pole wymagane");
                 exit = false;
@@ -109,10 +99,6 @@ public class ChangeEmailDialog extends DialogFragment {
                     if (!userService.checkPasswordForLogin(mContext, login, PasswordEncrypter.md5(password))) {
                         focusView = mPassword;
                         mPassword.setError("Niepoprawne hasło");
-                        exit = false;
-                    } else if (!Validator.isValidEmailFormat(email)) {
-                        focusView = mEmail;
-                        mEmail.setError(getString(R.string.rule_email));
                         exit = false;
                     }
                 } catch (NoNetworkConnectionException e) {
@@ -125,11 +111,8 @@ public class ChangeEmailDialog extends DialogFragment {
         @Override
         protected void onPostExecute(Boolean exit) {
             if (exit) {
-                UpdateEmailTask task = new UpdateEmailTask(login, email);
-                task.execute((Void) null);
-                Toast.makeText(mContext, "Udało się zmienić adres email", Toast.LENGTH_SHORT).show();
                 if (mDialogResult != null) {
-                    mDialogResult.finish(true, email);
+                    mDialogResult.finish(true);
                 }
                 d.dismiss();
             } else {
@@ -138,50 +121,11 @@ public class ChangeEmailDialog extends DialogFragment {
         }
     }
 
-    private void sendEmailEmailChanged(Context context, final String email, final String newEmail) {
-        final String body = "Witaj!\nWłaśnie zmieniłeś swój adres email w aplikacji HomeLibrary." +
-                "\n\nTwój nowy email to: " + newEmail +
-                "\n\nJeśli to nie Ty się dokonałeś tej zmiany, skontaktuj się z nami.\nPozdrawiamy\nZespół HomeLibrary";
-        final String subject = "Zmiana adresu email w aplikacji HomeLibrary";
-        SendEmailTask task = new SendEmailTask(body, subject, email, context);
-        task.execute((Void) null);
-    }
-
-    public class UpdateEmailTask extends AsyncTask<Void, Void, Void> {
-
-        private String login;
-        private String email;
-
-        public UpdateEmailTask(String login, String email) {
-            this.login = login;
-            this.email = email;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            User user;
-            try {
-                user = userService.findUserByLogin(mContext, login);
-            } catch (NoNetworkConnectionException e) {
-                NoNetworkConnectionToast.show(mContext);
-                return null;
-            }
-            String oldEmail = user.getEmail();
-            sendEmailEmailChanged(mContext, oldEmail, email);
-            try {
-                userService.updateUserEmail(mContext, login, email); // TODO: obsługa błędów
-            } catch (NoNetworkConnectionException e) {
-                NoNetworkConnectionToast.show(mContext);
-            }
-            return null;
-        }
-    }
-
     public void setDialogResult(OnMyDialogResult dialogResult) {
         mDialogResult = dialogResult;
     }
 
     public interface OnMyDialogResult {
-        void finish(boolean success, String email);
+        void finish(boolean success);
     }
 }

@@ -32,7 +32,7 @@ public class SortBooksDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.sort_dialog, null))
+        builder.setView(inflater.inflate(R.layout.dialog_sort, null))
                 .setNegativeButton("ANULUJ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {}

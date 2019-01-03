@@ -25,7 +25,7 @@ public class RoomGridAdapter extends ArrayAdapter<Room> {
     public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
         Room room = getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.room_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_room, parent, false);
         }
 
         TextView mName = convertView.findViewById(R.id.roomName);
