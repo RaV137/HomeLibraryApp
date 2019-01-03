@@ -39,7 +39,7 @@ import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class AddEditRoomActivity extends AppCompatActivity {
 
-    private boolean edit;
+    private boolean edit = false;
     private Room currRoom;
     private RoomService mService = RoomService.getInstance();
     private UserService mUserService = UserService.getInstance();
@@ -72,36 +72,40 @@ public class AddEditRoomActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_single_item, menu);
+        if(edit) {
+            getMenuInflater().inflate(R.menu.menu_single_item, menu);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.delete:
-                new AlertDialog.Builder(this)
-                        .setMessage("Czy chcesz usunąć ten pokój?")
-                        .setTitle("Usuń pokój")
-                        .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                deleteRoom();
-                            }
-                        })
-                        .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // dismiss the dialog
-                            }
-                        })
-                        .create().show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(edit) {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.delete:
+                    new AlertDialog.Builder(this)
+                            .setMessage("Czy chcesz usunąć ten pokój?")
+                            .setTitle("Usuń pokój")
+                            .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    deleteRoom();
+                                }
+                            })
+                            .setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    // dismiss the dialog
+                                }
+                            })
+                            .create().show();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

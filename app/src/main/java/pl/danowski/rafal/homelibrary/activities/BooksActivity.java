@@ -155,6 +155,9 @@ public class BooksActivity extends AppCompatActivity {
             case R.id.sort:
                 sort();
                 return true;
+            case android.R.id.home:
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

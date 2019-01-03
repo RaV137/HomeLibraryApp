@@ -24,7 +24,6 @@
             android:name=".activities.BooksActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:parentActivityName=".activities.MainMenuActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.LoginActivity"
@@ -71,8 +70,12 @@
             android:name=".activities.EditBookActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:parentActivityName=".activities.BooksActivity"
             android:theme="@style/AppTheme" />
+        <activity android:name=".activities.AddGBABookActivity"
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:parentActivityName=".activities.BooksActivity"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
