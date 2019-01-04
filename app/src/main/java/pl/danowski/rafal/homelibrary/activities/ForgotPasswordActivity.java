@@ -26,9 +26,9 @@ import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
+import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.password.PasswordGenerator;
-import pl.danowski.rafal.homelibrary.utiities.enums.IntentExtras;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
@@ -49,7 +49,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {

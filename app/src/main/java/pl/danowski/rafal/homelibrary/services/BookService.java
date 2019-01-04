@@ -2,12 +2,6 @@ package pl.danowski.rafal.homelibrary.services;
 
 import android.content.Context;
 
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import java.util.List;
 
 import pl.danowski.rafal.homelibrary.controllers.BookController;

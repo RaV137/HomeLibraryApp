@@ -52,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {

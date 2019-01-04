@@ -35,11 +35,13 @@ public class SortBooksDialog extends DialogFragment {
         builder.setView(inflater.inflate(R.layout.dialog_sort, null))
                 .setNegativeButton("ANULUJ", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {}
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
                 })
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int id) { }
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
                 });
         return builder.create();
     }
@@ -47,8 +49,8 @@ public class SortBooksDialog extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        final AlertDialog d = (AlertDialog)getDialog();
-        if(d != null) {
+        final AlertDialog d = (AlertDialog) getDialog();
+        if (d != null) {
             Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -81,7 +83,7 @@ public class SortBooksDialog extends DialogFragment {
                             exit = false;
                     }
 
-                    if(exit) {
+                    if (exit) {
                         if (mDialogResult != null) {
                             mDialogResult.finish(sortOptionEnum);
                         }

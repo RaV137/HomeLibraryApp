@@ -13,18 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import lombok.Setter;
 import pl.danowski.rafal.homelibrary.R;
 import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
-import pl.danowski.rafal.homelibrary.model.user.User;
-import pl.danowski.rafal.homelibrary.network.email.SendEmailTask;
 import pl.danowski.rafal.homelibrary.services.UserService;
 import pl.danowski.rafal.homelibrary.utiities.password.PasswordEncrypter;
 import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
-import pl.danowski.rafal.homelibrary.utiities.validators.Validator;
 
 public class DeleteAccountDialog extends DialogFragment {
 
@@ -90,7 +86,8 @@ public class DeleteAccountDialog extends DialogFragment {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            boolean exit = true;if (TextUtils.isEmpty(password)) {
+            boolean exit = true;
+            if (TextUtils.isEmpty(password)) {
                 focusView = mPassword;
                 mPassword.setError("Pole wymagane");
                 exit = false;

@@ -2,11 +2,10 @@ package pl.danowski.rafal.homelibrary.controllers;
 
 final class Urls {
 
-//    private static final String BASE_URL = "http://192.168.1.28:8080"; // stacjonarka, dom
+    private static final String BASE_URL = "http://192.168.1.28:8080"; // stacjonarka, dom
 //    private static final String BASE_URL = "http://192.168.184.35:8080"; // laptop, firma
 //    private static final String BASE_URL = "http://157.158.207.238:8080"; // laptop, polsl
-    private static final String BASE_URL = "http://192.168.1.30:8080"; // laptop, dom
-
+//    private static final String BASE_URL = "http://192.168.1.30:8080"; // laptop, dom
 
     // USERS
     private static final String USERS_URL = "/users";

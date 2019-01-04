@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -29,7 +26,6 @@ import pl.danowski.rafal.homelibrary.exceptions.NoNetworkConnectionException;
 import pl.danowski.rafal.homelibrary.model.gba.GBABook;
 import pl.danowski.rafal.homelibrary.network.BaseAsyncTask;
 import pl.danowski.rafal.homelibrary.services.BookService;
-import pl.danowski.rafal.homelibrary.utiities.sharedPreferences.SharedPreferencesUtilities;
 import pl.danowski.rafal.homelibrary.utiities.toast.NoNetworkConnectionToast;
 
 public class AddGBABookActivity extends AppCompatActivity {

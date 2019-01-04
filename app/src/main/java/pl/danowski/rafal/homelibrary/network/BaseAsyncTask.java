@@ -14,7 +14,7 @@ public class BaseAsyncTask<T, K, L> extends AsyncTask<T, K, L> {
 
     @Override
     protected L doInBackground(T... ts) {
-        if(Looper.myLooper() == null) {
+        if (Looper.myLooper() == null) {
             Looper.prepare();
         }
         return null;

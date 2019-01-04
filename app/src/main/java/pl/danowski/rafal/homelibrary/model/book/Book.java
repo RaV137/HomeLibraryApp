@@ -1,4 +1,5 @@
 package pl.danowski.rafal.homelibrary.model.book;
+
 import lombok.Getter;
 import lombok.Setter;
 

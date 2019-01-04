@@ -45,7 +45,7 @@ public class RoomsActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (AsyncTask task : tasks) {
-            if(task == null)
+            if (task == null)
                 continue;
             AsyncTask.Status status = task.getStatus();
             if (status.equals(AsyncTask.Status.PENDING) || status.equals(AsyncTask.Status.RUNNING)) {
@@ -112,7 +112,7 @@ public class RoomsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(rooms == null || rooms.size() == 0) {
+            if (rooms == null || rooms.size() == 0) {
                 TextView noRoomsInfo = findViewById(R.id.noRoomsInfo);
                 noRoomsInfo.setVisibility(View.VISIBLE);
                 gridViewRooms.setVisibility(View.GONE);
@@ -150,7 +150,7 @@ public class RoomsActivity extends AppCompatActivity {
             } catch (NoNetworkConnectionException e) {
                 NoNetworkConnectionToast.show(mContext);
             }
-            if(success) {
+            if (success) {
                 rooms.remove(room);
             }
             return null;
@@ -158,7 +158,7 @@ public class RoomsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(rooms == null || rooms.size() == 0) {
+            if (rooms == null || rooms.size() == 0) {
                 TextView noRoomsInfo = findViewById(R.id.noRoomsInfo);
                 noRoomsInfo.setVisibility(View.VISIBLE);
                 gridViewRooms.setVisibility(View.GONE);

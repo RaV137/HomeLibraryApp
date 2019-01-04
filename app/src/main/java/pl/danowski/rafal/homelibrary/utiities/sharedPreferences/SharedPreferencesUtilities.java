@@ -1,6 +1,5 @@
 package pl.danowski.rafal.homelibrary.utiities.sharedPreferences;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;

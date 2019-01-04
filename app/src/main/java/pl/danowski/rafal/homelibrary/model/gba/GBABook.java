@@ -5,7 +5,7 @@ import lombok.Setter;
 
 
 /**
- *  Google Books Api Book Dto
+ * Google Books Api Book Dto
  */
 @Getter
 @Setter
